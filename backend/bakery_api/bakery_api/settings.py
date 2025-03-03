@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'bakery',
+    'products',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +132,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+import os
+
+MEDIA_URL = '/media/'  # URL để truy cập ảnh
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Thư mục lưu ảnh
