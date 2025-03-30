@@ -1,10 +1,10 @@
 from django.db import models
 from django.utils import timezone
-from customers.models import Customers
+from customers.models import Customer
 # Create your models here.
-class Orders(models.Model):
+class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_date = models.DateTimeField(default=timezone.now)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=10, decimal_places=2)
