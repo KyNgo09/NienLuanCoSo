@@ -5,7 +5,17 @@ export default {
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sansita: ["Sansita Swashed", "cursive"],
+        opensans: ["Open Sans", "sans-serif"],
+      },
+      colors: {
+        customOrange: "#F3A446", // Màu cam
+        customBrown: "#814A22", // Màu nâu
+        customPeach: "#FFE1BC", // Màu đào nhạt
+      },
+    },
   },
   plugins: [],
 }
