@@ -1,40 +1,36 @@
-
 <template>
-     <header class="w-full h-16 bg-white shadow-md flex items-center justify-between px-6">
+  <div class="bg-white p-4 shadow-md flex justify-between items-center">
     <!-- Logo -->
-    <div class="flex items-center">
-      <img src="@/assets/logo.png" alt="Logo" class="h-10">
+    <div class="flex items-center space-x-2">
+      <img src="@/assets/logo.png" alt="Logo" class="h-12" />
+      <span class="text-xl font-semibold text-gray-700">Panadería</span>
     </div>
 
-    <!-- Actions (Notifications & User Profile) -->
+    <!-- User Actions -->
     <div class="flex items-center space-x-6">
-      <!-- Chat Icon -->
-      <font-awesome-icon :icon="['far', 'comment-dots']" class="text-gray-500 text-xl cursor-pointer hover:text-gray-700" />
+      <button class="relative">
+        <font-awesome-icon :icon="['far', 'comment-dots']" class="text-gray-500 text-xl" />
+      </button>
 
-      <!-- Notification Icon with Badge -->
-      <div class="relative">
-        <font-awesome-icon :icon="['far', 'bell']" class="text-gray-500 text-xl cursor-pointer hover:text-gray-700" />
-        <span class="absolute top-0 right-0 bg-customOrange text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">1</span>
-      </div>
+      <button class="relative">
+        <font-awesome-icon :icon="['far', 'bell']" class="text-gray-500 text-xl" />
+        <span class="absolute -top-1 -right-1 bg-customOrange text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">1</span>
+      </button>
 
-      <!-- User Profile -->
-      <div class="flex items-center space-x-2 bg-gray-100 p-2 rounded-lg">
-        <img src="" alt="User Avatar" class="h-8 w-8 rounded-full">
+      <!-- User Info -->
+      <div class="flex items-center space-x-2 cursor-pointer">
+        <img src="" alt="User" class="w-10 h-10 rounded-full border" />
         <div>
-          <p class="text-sm font-medium text-gray-700">Administrator</p>
-          <p class="text-xs text-gray-500">ID: 1234567</p>
+          <p class="text-gray-700 font-medium">Administrator</p>
+          <p class="text-gray-500 text-sm">ID: 1234567</p>
         </div>
       </div>
     </div>
-  </header>
-  </template>
-  
-  <script>
-  export default {
-    name: "Header",
-  };
-  </script>
-  
-  <style scoped>
-  </style>
-  
+  </div>
+</template>
+
+<script>
+export default {
+  name: "Header",
+};
+</script>

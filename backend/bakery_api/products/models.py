@@ -6,6 +6,8 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     class Meta:
         db_table = 'category'
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
@@ -23,3 +25,4 @@ class ProductImage(models.Model):
     image = models.ImageField(upload_to='product_images/')
     class Meta:
         db_table = 'productimage'
+

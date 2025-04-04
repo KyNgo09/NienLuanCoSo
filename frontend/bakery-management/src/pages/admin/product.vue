@@ -1,21 +1,24 @@
 <template>
-    <div class="flex min-h-screen">
-      <!-- Sidebar -->
+  <div class="flex flex-col min-h-screen w-full">
+    <Header />
+    <div class="flex flex-1 w-full">
       <LeftSidebar />
-  
-      <!-- Main content -->
       <div class="flex-1 p-6">
-        <h1 class="text-2xl font-bold">Category</h1>
+        <h1 class="text-2xl font-bold">Product</h1>
         <router-view />
       </div>
     </div>
-  </template>
+  </div>
+</template>
+  
   
   <script>
   import LeftSidebar from "@/components/admin/layout/left_sidebar.vue"; 
-  
+  import Header from "@/components/admin/layout/header.vue";
+
   export default {
     components: {
+      Header,
       LeftSidebar,
     },
   };
