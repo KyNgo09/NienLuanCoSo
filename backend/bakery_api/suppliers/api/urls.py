@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import SupplierViewSet, SupplyOrderViewSet, SupplyOrderDetailViewSet
+from .views import SupplierViewSet, SupplyOrderViewSet, SupplyOrderDetailViewSet, supplier_list_create, delete_supplier
 
 router = DefaultRouter()
 router.register(r'suppliers', SupplierViewSet, basename='supplier')
@@ -10,4 +10,6 @@ router.register(r'supply_order_details', SupplyOrderDetailViewSet, basename='sup
 
 urlpatterns = [
     path('', include(router.urls)),  
+    path('api/categories/', supplier_list_create),
+    path('api/categories/<int:unit_id>/', delete_supplier, name='delete-supplier')
 ]

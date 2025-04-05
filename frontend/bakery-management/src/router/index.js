@@ -6,6 +6,7 @@ import ingredient from '@/pages/admin/ingredient.vue'
 import recipe from '@/pages/admin/recipe.vue'
 import order from '@/pages/admin/order.vue'
 import promotion from '@/pages/admin/promotion.vue'
+import unit from '@/pages/admin/unit.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/admin/promotion',
       name: 'promotion',
       component: promotion,
+    },
+    {
+      path: '/admin/unit',
+      name: 'unit',
+      component: unit,
     },
   ],
 })

@@ -7,13 +7,13 @@
         <h2 class="text-xl font-bold mb-2 text-gray-900 font-opensans">Danh mục sản phẩm</h2>
         <form @submit.prevent="createCategory" class="mb-4">
           <input v-model="newCategory" placeholder="Tên danh mục" class="border p-2 mr-2 text-black" />
-          <button type="submit" class="bg-customOrange text-white p-2 font-bold font-opensans rounded-lg ">Thêm</button>
+          <button type="submit" class="bg-customOrange text-white p-2 font-bold font-opensans rounded">Thêm</button>
         </form>
 
         <table class="w-full border-collapse border border-gray -300 rounded-lg overflow-hidden">
           <thead>
             <tr class="bg-customOrange text-white text-left font-opensans">
-              <th class="px-4 py-2">#</th>
+              <th class="px-4 py-2">STT</th>
               <th class="px-4 py-2">Tên danh mục</th>
               <th class="px-4 py-2">Thao tác</th>
             </tr>

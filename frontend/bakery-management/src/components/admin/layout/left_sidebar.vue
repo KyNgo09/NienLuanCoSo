@@ -24,6 +24,7 @@
     { label: "Danh mục sản phẩm", path: "/admin/category"},
     { label: "Sản phẩm", path: "/admin/product"},
     { label: "Nguyên liệu", path: "/admin/ingredient"},
+    { label: "Đơn vị đo lường", path: "/admin/unit"},
     { label: "Công thức", path: "/admin/recipe"},
     { label: "Đơn đặt hàng", path: "/admin/order"},
     { label: "Khuyến mãi", path: "/admin/promotion"},

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-4 shadow-md flex justify-between items-center">
+  <div class="bg-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
     <!-- Logo -->
     <div class="flex items-center space-x-2">
       <img src="@/assets/logo.png" alt="Logo" class="h-12" />
@@ -28,6 +28,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 export default {
