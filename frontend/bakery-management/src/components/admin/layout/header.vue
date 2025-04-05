@@ -19,7 +19,7 @@
 
       <!-- User Info -->
       <div class="flex items-center space-x-2 cursor-pointer">
-        <img src="" alt="User" class="w-10 h-10 rounded-full border" />
+        <img src="@/assets/admin.png" alt="User" class="w-10 h-10 rounded-full border" />
         <div>
           <p class="text-gray-700 font-medium">Administrator</p>
           <p class="text-gray-500 text-sm">ID: 1234567</p>
