@@ -1,55 +1,48 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
+// Layouts
+import Admin from '@/layouts/admin.vue'
+import User from '@/layouts/user.vue' 
+
+// Admin pages
 import Dashboard from '@/pages/admin/dashboard.vue'
-import category from '@/pages/admin/category.vue'
-import product from '@/pages/admin/product.vue'
-import ingredient from '@/pages/admin/ingredient.vue'
-import recipe from '@/pages/admin/recipe.vue'
-import order from '@/pages/admin/order.vue'
-import promotion from '@/pages/admin/promotion.vue'
-import unit from '@/pages/admin/unit.vue'
+import Category from '@/pages/admin/category.vue'
+import Product from '@/pages/admin/product.vue'
+import Ingredient from '@/pages/admin/ingredient.vue'
+import Recipe from '@/pages/admin/recipe.vue'
+import Order from '@/pages/admin/order.vue'
+import Promotion from '@/pages/admin/promotion.vue'
+import Unit from '@/pages/admin/unit.vue'
+
+// User pages
+
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-   
+    // Admin routes
     {
       path: '/admin',
-      name: 'admin',
-      component: Dashboard,
+      component: Admin,
+      children: [
+        { path: '', name: 'admin', component: Dashboard },
+        { path: 'category', name: 'category', component: Category },
+        { path: 'product', name: 'product', component: Product },
+        { path: 'ingredient', name: 'ingredient', component: Ingredient },
+        { path: 'recipe', name: 'recipe', component: Recipe },
+        { path: 'order', name: 'order', component: Order },
+        { path: 'promotion', name: 'promotion', component: Promotion },
+        { path: 'unit', name: 'unit', component: Unit },
+      ],
     },
+
+    // User routes
     {
-      path: '/admin/category',
-      name: 'category',
-      component: category,
-    },
-    {
-      path: '/admin/product',
-      name: 'product',
-      component: product,
-    },
-    {
-      path: '/admin/ingredient',
-      name: 'ingredient',
-      component: ingredient,
-    },
-    {
-      path: '/admin/recipe',
-      name: 'recipe',
-      component: recipe,
-    },
-    {
-      path: '/admin/order',
-      name: 'order',
-      component: order,
-    },
-    {
-      path: '/admin/promotion',
-      name: 'promotion',
-      component: promotion,
-    },
-    {
-      path: '/admin/unit',
-      name: 'unit',
-      component: unit,
+      path: '/',
+      component: User,
+      children: [
+        
+      ],
     },
   ],
 })

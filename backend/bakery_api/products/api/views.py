@@ -15,6 +15,53 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    def create(self, request, *args, **kwargs):
+        # Tạo sản phẩm trước
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+
+        # Xử lý hình ảnh nếu có
+        images = request.FILES.getlist('images')  # Giả sử gửi nhiều ảnh qua field 'images'
+        for image in images:
+            # Lưu tạm ảnh vào server
+            temp_path = f'media/temp/{image.name}'
+            with open(temp_path, 'wb+') as temp_file:
+                for chunk in image.chunks():
+                    temp_file.write(chunk)
+            
+            # Tải lên Google Drive và lấy URL
+            image_url = upload_to_google_drive(temp_path, image.name)
+            
+            # Lưu URL vào DB
+            ProductImage.objects.create(product=product, image=image_url)
+            
+            # Xóa file tạm
+            os.remove(temp_path)
+
+        return Response(serializer.data, status=201)
+
+    def update(self, request, *args, **kwargs):
+        # Cập nhật sản phẩm
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        product = serializer.save()
+
+        # Xử lý thêm ảnh mới nếu có
+        images = request.FILES.getlist('images')
+        if images:
+            for image in images:
+                temp_path = f'media/temp/{image.name}'
+                with open(temp_path, 'wb+') as temp_file:
+                    for chunk in image.chunks():
+                        temp_file.write(chunk)
+                image_url = upload_to_google_drive(temp_path, image.name)
+                ProductImage.objects.create(product=product, image=image_url)
+                os.remove(temp_path)
+
+        return Response(serializer.data)
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer

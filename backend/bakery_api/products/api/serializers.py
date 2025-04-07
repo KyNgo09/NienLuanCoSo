@@ -9,18 +9,12 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = '__all__'  
+        fields = ['imageurl']
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
-    # category = CategorySerializer()  # Hiển thị thông tin category
-
+    images = ProductImageSerializer(source='productimage_set', many=True)
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['product_id', 'name', 'price', 'description', 'category', 'images']
 
-    # def create(self, validated_data):
-    #     category_data = validated_data.pop('category')
-    #     category, _ = Category.objects.get_or_create(**category_data)
-    #     product = Product.objects.create(category=category, **validated_data)
-    #     return product
+   
