@@ -23,13 +23,24 @@
               <td class="px-4 py-2">{{ index + 1 }}</td>
               <td class="px-4 py-2">{{ cat.name }}</td>
               <td class="px-4 py-2">
-                <button @click="deleteCategory(cat.category_id)" class="text-red-500 hover:text-red-700 font-semibold">
+                <button @click="deleteCategory(cat.id)" class="text-red-500 hover:text-red-700 font-semibold">
                   Xóa
                 </button>
+                <button @click="editCategory(cat)" class="text-blue-500 hover:text-blue-700 ml-5">Sửa</button>
               </td>
             </tr>
           </tbody>
         </table>
+        <!-- Form sửa (hiển thị khi nhấn nút Sửa) -->
+        <div v-if="editingCategory" class="mt-4">
+          <form @submit.prevent="updateCategory" class="grid grid-cols-1 gap-4">
+            <input v-model="editingCategory.name" placeholder="Tên danh mục" class="border p-2 rounded" />
+            <div class="flex space-x-2">
+              <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Cập nhật</button>
+              <button @click="editingCategory = null" class="bg-gray-500 text-white px-4 py-2 rounded">Hủy</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -50,13 +61,17 @@ export default {
     return {
       categories: [],
       newCategory: '',
+      editingCategory: null,
     };
   },
   methods: {
     async fetchCategories() {
       try {
         const res = await axios.get('http://127.0.0.1:8000/api/categories/');
-        this.categories = res.data;
+        this.categories = res.data.map(cat => ({
+          id: cat.id || cat.category_id, // Chuẩn hóa id
+          name: cat.name,
+        }));
         console.log("Danh sách danh mục:", this.categories); // Debug
       } catch (error) {
         console.error("Lỗi khi lấy danh mục:", error);
@@ -85,10 +100,33 @@ export default {
       try {
         console.log("URL gọi API:", `http://127.0.0.1:8000/api/categories/${id}/`); // Debug URL
         await axios.delete(`http://127.0.0.1:8000/api/categories/${id}/`);
-        this.categories = this.categories.filter(cat => cat.category_id !== id);
+        this.categories = this.categories.filter(cat => cat.id !== id);
         alert("Xóa danh mục thành công!");
       } catch (error) {
         console.error("Lỗi khi xóa danh mục:", error);
+        if (error.response) {
+          console.error("Phản hồi từ server:", error.response.data);
+        }
+      }
+    },
+    editCategory(category) {
+      this.editingCategory = {
+        id: category.id || category.category_id, // Đảm bảo lấy đúng id
+        name: category.name,
+      };
+    },
+    async updateCategory() {
+      if (!this.editingCategory || !this.editingCategory.name.trim()) return;
+      const categoryId = this.editingCategory.id;      
+      try {
+        await axios.put(`http://127.0.0.1:8000/api/categories/${categoryId}/`, {
+          name: this.editingCategory.name,
+        });
+        this.editingCategory = null; // Ẩn form sau khi cập nhật
+        await this.fetchCategories(); // Cập nhật danh sách
+        alert("Cập nhật danh mục thành công!");
+      } catch (error) {
+        console.error("Lỗi khi cập nhật danh mục:", error);
         if (error.response) {
           console.error("Phản hồi từ server:", error.response.data);
         }

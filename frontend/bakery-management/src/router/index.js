@@ -15,7 +15,9 @@ import Promotion from '@/pages/admin/promotion.vue'
 import Unit from '@/pages/admin/unit.vue'
 
 // User pages
-
+import User_Product from '@/pages/user/product.vue'
+import Home from '@/pages/user/home.vue'
+import Account from '@/pages/user/account.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,7 +43,9 @@ const router = createRouter({
       path: '/',
       component: User,
       children: [
-        
+        { path: '', name: 'home', component: Home},
+        {path: 'products', name: 'products', component: User_Product},
+        {path: 'account', name: 'account', component: Account},
       ],
     },
   ],
