@@ -9,10 +9,6 @@
     <!-- User Actions -->
     <div class="flex items-center space-x-6">
       <button class="relative">
-        <font-awesome-icon :icon="['far', 'comment-dots']" class="text-gray-500 text-xl" />
-      </button>
-
-      <button class="relative">
         <font-awesome-icon :icon="['far', 'bell']" class="text-gray-500 text-xl" />
         <span class="absolute -top-1 -right-1 bg-customOrange text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">1</span>
       </button>

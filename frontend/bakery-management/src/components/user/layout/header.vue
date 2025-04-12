@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-white text-black shadow-md">
+  <header class="bg-white text-black font-normal shadow-md sticky top-0 z-50">
     <div class="container mx-auto flex items-center justify-between">
       <!-- Logo -->
       <router-link to="/" class="flex items-center">

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'suppliers',
     'delivery',
     'recipes',
+    'accounts',
     'corsheaders',
 ]
 
