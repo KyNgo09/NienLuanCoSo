@@ -14,6 +14,7 @@ export default {
         customOrange: "#F3A446", // Màu cam
         customBrown: "#814A22", // Màu nâu
         customPeach: "#FFE1BC", // Màu đào nhạt
+        customBlack: "#1F1711", // Màu 
       },
     },
   },

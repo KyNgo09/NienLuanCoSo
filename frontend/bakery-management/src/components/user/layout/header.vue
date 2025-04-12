@@ -39,10 +39,36 @@
       <!-- Tài khoản & Giỏ hàng -->
       <div class="flex items-center space-x-6 font-opensans">
         <!-- Tài khoản (Biểu tượng User) -->
-        <router-link to="/account" class="flex flex-col items-center hover:text-customBrown">
-          <i class="far fa-user w-6 h-6 text-gray-700"></i>
-          <span class="text-sm">Tài khoản</span>
-        </router-link>
+        <div class="relative">
+          <div class="flex flex-col items-center hover:text-customBrown cursor-pointer" @click="toggleDropdown">
+            <i class="far fa-user w-6 h-6 text-gray-700"></i>
+            <span class="text-sm">Tài khoản</span>
+          </div>
+          <!-- Dropdown -->
+          <div v-if="showDropdown"
+            class="absolute bg-white text-black rounded-md shadow-lg mt-2 w-64 z-10 top-full right-0" @click.stop>
+            <div v-if="isLoggedIn" class="p-4">
+              <div class="flex items-center space-x-4">
+                <img src="@/assets/user.png" alt="Avatar" class="h-12 w-12 rounded-full object-cover" />
+                <div>
+                  <p class="font-semibold">Xin chào! {{ user?.username || 'User' }}</p>
+                  <p class="text-sm text-gray-600">Điểm tích lũy: {{ customer?.loyalty_point || 0 }}</p>
+                </div>
+              </div>
+              <button @click="logout"
+                class="mt-4 w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-200 text-sm">
+                Đăng xuất
+              </button>
+            </div>
+            <div v-else class="p-4 text-center">
+              <p class="text-gray-500 mb-4">Chưa đăng nhập</p>
+              <router-link to="/account"
+                class="block w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-200 text-sm">
+                Đăng nhập
+              </router-link>
+            </div>
+          </div>
+        </div>
 
         <!-- Giỏ hàng -->
         <router-link to="/cart" class="flex flex-col items-center relative hover:text-customBrown">
@@ -67,7 +93,17 @@ export default {
     return {
       productItems: [],
       cartCount: 2,
+      user: JSON.parse(localStorage.getItem('user')) || null,
+      customer: JSON.parse(localStorage.getItem('customer')) || null,
+      isLoggedIn: !!localStorage.getItem('user_id'),
+      showDropdown: false,
     };
+  },
+  created() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
   mounted() {
     this.fetchCategories();
@@ -80,18 +116,31 @@ export default {
           name: category.name,
           path: `/products/${category.name}`,
         }));
-        console.log('Danh mục đã tải:', this.productItems); 
+        console.log('Danh mục đã tải:', this.productItems);
       } catch (error) {
         console.error('Lỗi khi lấy danh mục:', error);
+      }
+    },
+    logout() {
+      localStorage.removeItem('user');
+      localStorage.removeItem('customer');
+      localStorage.removeItem('user_id');
+      this.user = null;
+      this.customer = null;
+      this.isLoggedIn = false;
+      window.location.reload();
+    },
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    handleClickOutside(event) {
+      const dropdown = this.$el.querySelector('.absolute');
+      if (dropdown && !dropdown.contains(event.target) && !this.$el.querySelector('.cursor-pointer').contains(event.target)) {
+        this.showDropdown = false;
       }
     },
   },
 };
 </script>
 
-<style scoped>
-/* Tùy chỉnh thêm nếu cần */
-.group:hover .group-hover\:block {
-  display: block;
-}
-</style>
+<style scoped></style>

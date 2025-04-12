@@ -100,13 +100,14 @@ export default {
       registerForm: {
         email: '',
         password: '',
-        confirmPassword: '', 
+        confirmPassword: '',
         username: '',
       },
       loginError: '',
       loginSuccess: '',
       registerError: '',
       registerSuccess: '',
+      userId: null,  // Lưu user_id sau đăng nhập
     };
   },
   methods: {
@@ -117,6 +118,12 @@ export default {
         this.loginSuccess = response.data.message;
         this.loginError = '';
         console.log('Login response:', response.data);
+
+        // Lưu user_id, user, customer
+        localStorage.setItem('user_id', response.data.user.id);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('customer', JSON.stringify(response.data.customer || null));
+        this.$emit('login-success'); // Thêm event để thông báo Header
         window.location.href = 'http://localhost:5173/';
       } catch (error) {
         console.error('Login error:', error.response);
@@ -125,7 +132,6 @@ export default {
       }
     },
     async handleRegister() {
-      // Kiểm tra mật khẩu khớp
       if (this.registerForm.password !== this.registerForm.confirmPassword) {
         this.registerError = 'Mật khẩu không khớp';
         this.registerSuccess = '';
