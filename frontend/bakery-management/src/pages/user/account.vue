@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-screen w-full">
     <Header />
-    <div class="min-h-screen flex items-center justify-center bg-gray-100 py-12">
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
       <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <!-- Form Đăng nhập -->
         <div v-if="showLoginForm">
@@ -79,16 +79,19 @@
         </div>
       </div>
     </div>
+    <Footer />
   </div>
 </template>
 
 <script>
 import Header from "@/components/user/layout/header.vue";
+import Footer from "@/components/user/layout/footer.vue";
 import axios from 'axios';
 
 export default {
   components: {
     Header,
+    Footer,
   },
   data() {
     return {
