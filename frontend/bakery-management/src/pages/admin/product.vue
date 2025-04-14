@@ -20,20 +20,41 @@
             class="border p-2 text-black rounded" />
           <input v-model.number="newProduct.stock_quantity" type="number" placeholder="Số lượng"
             class="border p-2 text-black rounded" />
-          <p>Hình ảnh</p>
-          <input type="file" @change="handleFileUpload" multiple accept="image/*"
-            class="border p-2 text-black rounded md:col-span-2" />
+          <div>
+            <label class="font-semibold text-gray-700">Ảnh sản phẩm:</label>
+            <input type="file" accept="image/*" multiple @change="handleImageChange"
+              class="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-customOrange" />
+            <div v-if="selectedImages.length" class="flex flex-col space-y-2 mt-2">
+              <div v-for="(image, index) in selectedImages" :key="index" class="flex items-center space-x-2">
+                <span class="text-gray-700">{{ image.name }}</span>
+                <button type="button" @click="removeImage(index)" class="text-red-500 hover:text-red-700 font-semibold">
+                  Xóa
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="md:col-span-2">
-            <button type="submit" class="bg-customOrange text-white px-4 py-2 rounded font-bold">
-              Thêm sản phẩm
+            <button type="submit" :disabled="isLoading" class="bg-customOrange text-white px-4 py-2 rounded font-bold">
+              {{ isLoading ? 'Đang xử lý...' : 'Thêm sản phẩm' }}
             </button>
+            <div v-if="isLoading" class="mt-2 flex items-center text-gray-700">
+              <svg class="animate-spin h-5 w-5 mr-2 text-customOrange" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+              Đang upload sản phẩm và ảnh...
+            </div>
           </div>
         </form>
 
+        <h2 class="text-xl font-bold mb-4 text-gray-900 font-opensans">Danh Sách Sản Phẩm</h2>
         <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden">
           <thead>
             <tr class="bg-customOrange text-white text-left">
-              <th class="px-4 py-2">ID</th>
+              <!-- <th class="px-4 py-2">Hình ảnh</th> -->
               <th class="px-4 py-2">Tên</th>
               <th class="px-4 py-2">Danh mục</th>
               <th class="px-4 py-2">Mô tả</th>
@@ -45,14 +66,14 @@
           <tbody>
             <tr v-for="(product, index) in products" :key="product.product_id"
               class="even:bg-gray-100 hover:bg-gray-200 transition text-gray-900">
-              <td class="px-4 py-2">{{ index + 1 }}</td>
               <td class="px-4 py-2">{{ product.name }}</td>
               <td class="px-4 py-2">{{ getCategoryName(product.category) }}</td>
               <td class="px-4 py-2">{{ product.description }}</td>
-              <td class="px-4 py-2">{{ product.price }}</td>
+              <td class="px-4 py-2">{{ formatPrice(product.price) }} VND</td>
               <td class="px-4 py-2">{{ product.stock_quantity }}</td>
               <td class="px-4 py-2">
-                <button @click="deleteProduct(product.product_id)" class="text-red-500 hover:text-red-700 font-semibold">
+                <button @click="deleteProduct(product.product_id)"
+                  class="text-red-500 hover:text-red-700 font-semibold">
                   Xóa
                 </button>
               </td>
@@ -84,11 +105,24 @@ export default {
         category: '',
         stock_quantity: null
       },
-      selectedFiles: [],
+      selectedImages: [],
       categories: [],
+      products: [],
+      isLoading: false,
     };
   },
   methods: {
+    handleImageChange(event) {
+      const files = Array.from(event.target.files);
+      this.selectedImages = files;
+    },
+    removeImage(index) {
+      this.selectedImages.splice(index, 1);
+    },
+    formatPrice(price) {
+      if (!price && price !== 0) return '0';
+      return parseInt(price).toLocaleString('vi-VN');
+    },
     async fetchCategories() {
       try {
         const res = await axios.get('http://127.0.0.1:8000/api/categories/');
@@ -98,9 +132,7 @@ export default {
         console.error("Lỗi khi lấy danh mục:", error);
       }
     },
-    handleFileUpload(event) {
-      this.selectedFiles = event.target.files;
-    },
+
     async fetchProducts() {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/products/');
@@ -110,66 +142,70 @@ export default {
       }
     },
     async createProduct() {
-      for (let file of this.selectedFiles) {
-    if (!file.type.startsWith('image/')) {
-      alert('Vui lòng chỉ chọn các tệp ảnh (JPG, PNG, v.v.)!');
-      return;
-    }
-  }
-  if (!this.newProduct.name || 
-      this.newProduct.price === null || 
-      !this.newProduct.category || 
-      this.newProduct.stock_quantity === null || 
-      !this.newProduct.description) {
-    alert('Vui lòng điền đầy đủ thông tin (tên, giá, danh mục, số lượng, mô tả)!');
-    return;
-  }
-
-  if (this.selectedFiles.length === 0) {
-    alert('Vui lòng chọn ít nhất một hình ảnh!');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('name', this.newProduct.name);
-  formData.append('description', this.newProduct.description);
-  formData.append('price', this.newProduct.price);
-  formData.append('category', this.newProduct.category);
-  formData.append('stock_quantity', this.newProduct.stock_quantity);
-
-  for (let i = 0; i < this.selectedFiles.length; i++) {
-    console.log('File:', this.selectedFiles[i].name, this.selectedFiles[i].type, this.selectedFiles[i].size);
-    formData.append('images', this.selectedFiles[i]);
-  }
-
-  for (let pair of formData.entries()) {
-    console.log(pair[0] + ': ' + pair[1]);
-  }
-
-  try {
-    const response = await axios.post('http://127.0.0.1:8000/api/products/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+      if (
+        !this.newProduct.name ||
+        this.newProduct.price === null ||
+        !this.newProduct.category ||
+        this.newProduct.stock_quantity === null ||
+        !this.newProduct.description
+      ) {
+        alert('Vui lòng điền đầy đủ thông tin (tên, giá, danh mục, số lượng, mô tả)!');
+        return;
       }
-    });
-    console.log('Response:', response.data);
-    this.newProduct = { name: '', description: '', price: null, category: '', stock_quantity: null };
-    this.selectedFiles = [];
-    await this.fetchProducts();
-    alert('Thêm sản phẩm thành công!');
-  } catch (error) {
-    console.error('Lỗi khi thêm sản phẩm:', error.response ? error.response.data : error.message);
-    alert('Có lỗi xảy ra khi thêm sản phẩm: ' + JSON.stringify(error.response ? error.response.data : error.message));
-    // Kiểm tra lại danh sách sản phẩm ngay cả khi có lỗi
-    await this.fetchProducts();
-    const newProduct = this.products.find(p => p.name === this.newProduct.name);
-    if (newProduct) {
-      alert('Sản phẩm đã được thêm thành công dù có lỗi giao diện!');
-      this.newProduct = { name: '', description: '', price: null, category: '', stock_quantity: null };
-      this.selectedFiles = [];
-    }
-  }
-},
+
+      try {
+        this.isLoading = true;
+
+        const data = {
+          name: this.newProduct.name,
+          description: this.newProduct.description,
+          price: this.newProduct.price,
+          category: this.newProduct.category,
+          stock_quantity: this.newProduct.stock_quantity
+        };
+
+        console.log('Dữ liệu gửi đi:', data);
+        const response = await axios.post('http://127.0.0.1:8000/api/products/', data, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        });
+
+        const productId = response.data.product_id;
+        console.log('Sản phẩm đã tạo:', response.data);
+
+        // Upload ảnh nếu có
+        if (this.selectedImages.length > 0) {
+          for (const image of this.selectedImages) {
+            const formData = new FormData();
+            formData.append('image', image);
+
+            await axios.post(`http://127.0.0.1:8000/api/products/${productId}/upload-image/`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+              timeout: 60000
+            });
+          }
+        }
+
+        this.newProduct = {
+          name: '',
+          description: '',
+          price: null,
+          category: '',
+          stock_quantity: null
+        };
+        this.selectedImages = [];
+        await this.fetchProducts();
+        alert('Thêm sản phẩm thành công!');
+        this.isLoading = false;
+      } catch (error) {
+        const errorMsg =
+          error.response?.data?.error ||
+          error.response?.data?.detail ||
+          error.message;
+        console.error('Lỗi chi tiết:', error.response?.data || error);
+        alert(`Lỗi khi thêm sản phẩm: ${errorMsg}`);
+      }
+    },
     async deleteProduct(productId) {
       if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
         try {

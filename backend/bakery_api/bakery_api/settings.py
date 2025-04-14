@@ -147,3 +147,6 @@ import os
 
 MEDIA_URL = '/media/'  # URL để truy cập ảnh
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Thư mục lưu ảnh
+
+DRIVE_FOLDER_ID = ''
+CORS_ALLOWED_ORIGINS = ['http://localhost:5173']

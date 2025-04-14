@@ -18,6 +18,7 @@ import Unit from '@/pages/admin/unit.vue'
 import User_Product from '@/pages/user/product.vue'
 import Home from '@/pages/user/home.vue'
 import Account from '@/pages/user/account.vue'
+import ProductDetail from '@/pages/user/product_detail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,8 @@ const router = createRouter({
         { path: '', name: 'home', component: Home},
         {path: 'products', name: 'products', component: User_Product},
         {path: 'account', name: 'account', component: Account},
+        {path: '/product/:id', name: 'ProductDetail', component: ProductDetail},
+
       ],
     },
   ],
