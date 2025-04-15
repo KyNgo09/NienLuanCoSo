@@ -25,7 +25,15 @@ from django.conf import settings
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category_id = self.request.query_params.get('category')
+        if category_id:
+            try:
+                queryset = queryset.filter(category__category_id=int(category_id))
+            except (ValueError, TypeError):
+                print(f"category_id không hợp lệ: {category_id}")
+        return queryset
     def get_credentials(self):
         token_path = os.path.join(settings.BASE_DIR, 'credentials', 'token.json')
         client_secret_path = os.path.join(settings.BASE_DIR, 'credentials', 'client_secret.json')

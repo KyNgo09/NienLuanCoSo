@@ -14,19 +14,19 @@
         <div class="relative group">
           <router-link to="/products" class="hover:text-customBrown flex items-center">
             Sản phẩm
-            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            </svg> -->
           </router-link>
           <!-- Dropdown -->
-          <div
+          <!-- <div
             class="absolute opacity-0 group-hover:opacity-100 bg-white text-black rounded-md shadow-lg mt-2 w-48 z-10">
             <router-link v-for="item in productItems" :key="item.path" :to="item.path"
               class="block px-4 py-2 hover:text-customBrown">
               {{ item.name }}
             </router-link>
             <div v-if="productItems.length === 0" class="px-4 py-2 text-gray-500">Không có danh mục</div>
-          </div>
+          </div> -->
         </div>
 
         <!-- Giới thiệu -->
