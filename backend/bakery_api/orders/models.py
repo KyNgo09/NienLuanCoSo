@@ -12,10 +12,10 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=10, decimal_places=2)
     final_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method_choices = [
-        ('Cash', 'Cash'),
-        ('Credit card', 'Credit card'),
+        ('Nhận tại cửa hàng', 'Nhận tại cửa hàng'),
+        ('Thanh toán khi nhận hàng', 'Thanh toán khi nhận hàng'),
     ]
-    payment_method = models.CharField(max_length=20, choices=payment_method_choices, default='Cash')
+    payment_method = models.CharField(max_length=50, choices=payment_method_choices, default='Thanh toán khi nhận hàng')
     class Meta:
         db_table = 'orders'
 

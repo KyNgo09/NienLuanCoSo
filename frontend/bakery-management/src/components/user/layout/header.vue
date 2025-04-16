@@ -14,19 +14,7 @@
         <div class="relative group">
           <router-link to="/products" class="hover:text-customBrown flex items-center">
             Sản phẩm
-            <!-- <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg> -->
           </router-link>
-          <!-- Dropdown -->
-          <!-- <div
-            class="absolute opacity-0 group-hover:opacity-100 bg-white text-black rounded-md shadow-lg mt-2 w-48 z-10">
-            <router-link v-for="item in productItems" :key="item.path" :to="item.path"
-              class="block px-4 py-2 hover:text-customBrown">
-              {{ item.name }}
-            </router-link>
-            <div v-if="productItems.length === 0" class="px-4 py-2 text-gray-500">Không có danh mục</div>
-          </div> -->
         </div>
 
         <!-- Giới thiệu -->
@@ -72,7 +60,7 @@
 
         <!-- Giỏ hàng -->
         <router-link to="/cart" class="flex flex-col items-center relative hover:text-customBrown">
-          <i class="fa fa-shopping-basket w-6 h-6 text-gray-700 "></i>
+          <i class="fa fa-shopping-basket w-6 h-6 text-gray-700"></i>
           <span class="text-sm">Giỏ hàng</span>
           <span v-if="cartCount > 0"
             class="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -92,7 +80,7 @@ export default {
   data() {
     return {
       productItems: [],
-      cartCount: 2,
+      cartCount: JSON.parse(localStorage.getItem('cart'))?.length || 0,
       user: JSON.parse(localStorage.getItem('user')) || null,
       customer: JSON.parse(localStorage.getItem('customer')) || null,
       isLoggedIn: !!localStorage.getItem('user_id'),
@@ -100,10 +88,21 @@ export default {
     };
   },
   created() {
+    this.updateAuthState();
+    this.updateCartCount();
     document.addEventListener('click', this.handleClickOutside);
+    window.addEventListener('storage', this.handleStorageChange);
+    
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleClickOutside);
+    window.removeEventListener('storage', this.handleStorageChange);
+  },
+  watch: {
+    '$route'() {
+      this.updateAuthState();
+      this.showDropdown = false;
+    }
   },
   mounted() {
     this.fetchCategories();
@@ -121,6 +120,29 @@ export default {
         console.error('Lỗi khi lấy danh mục:', error);
       }
     },
+    updateAuthState() {
+      const user = JSON.parse(localStorage.getItem('user')) || null;
+      const customer = JSON.parse(localStorage.getItem('customer')) || null;
+      const userId = localStorage.getItem('user_id');
+      this.user = user;
+      this.customer = customer;
+      this.isLoggedIn = !!userId;
+      console.log('Auth state updated:', {
+        user,
+        customer,
+        userId,
+        isLoggedIn: this.isLoggedIn,
+      });
+    },
+    updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      this.cartCount = cart.length;
+      console.log('Cart count updated:', this.cartCount);
+    },
+    handleStorageChange() {
+      this.updateAuthState();
+      this.updateCartCount();
+    },
     logout() {
       localStorage.removeItem('user');
       localStorage.removeItem('customer');
@@ -128,6 +150,7 @@ export default {
       this.user = null;
       this.customer = null;
       this.isLoggedIn = false;
+      this.showDropdown = false;
       window.location.reload();
     },
     toggleDropdown() {

@@ -19,6 +19,9 @@ import User_Product from '@/pages/user/product.vue'
 import Home from '@/pages/user/home.vue'
 import Account from '@/pages/user/account.vue'
 import ProductDetail from '@/pages/user/product_detail.vue'
+import Cart from '@/pages/user/cart.vue'
+import checkout from '@/pages/user/checkout.vue'
+import Checkout from '@/pages/user/checkout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,7 +51,8 @@ const router = createRouter({
         {path: 'products', name: 'products', component: User_Product},
         {path: 'account', name: 'account', component: Account},
         {path: '/product/:id', name: 'ProductDetail', component: ProductDetail},
-
+        {path: 'cart', name: 'cat', component: Cart},
+        {path: 'checkout', name: 'checkout', component: Checkout},
       ],
     },
   ],

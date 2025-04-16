@@ -75,7 +75,6 @@ export default {
       product: null,
       categories: [],
       relatedProducts: [],
-      cart: [],
       quantity: 1
     };
   },
@@ -85,7 +84,6 @@ export default {
         await this.fetchCategories();
         const response = await axios.get(`http://127.0.0.1:8000/api/products/${this.$route.params.id}/`);
         this.product = response.data;
-        // Gọi fetchRelatedProducts sau khi có product
         await this.fetchRelatedProducts();
       } catch (error) {
         console.error('Lỗi khi lấy chi tiết sản phẩm:', error);
@@ -126,15 +124,23 @@ export default {
       return category ? category.name : 'Đang tải danh mục...';
     },
     addToCart(product) {
-      this.cart.push({
-        product_id: product.product_id,
-        name: product.name,
-        price: product.price,
-        image: product.images && product.images.length > 0 ? product.images[0].imageurl : null,
-        quantity: this.quantity
-      });
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingItem = cart.find(item => item.product_id === product.product_id);
+      if (existingItem) {
+        existingItem.quantity += this.quantity;
+      } else {
+        cart.push({
+          product_id: product.product_id,
+          name: product.name,
+          price: product.price,
+          image: product.images && product.images.length > 0 ? product.images[0].imageurl : null,
+          quantity: this.quantity
+        });
+      }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      this.$root.$emit('cart-updated', cart.length); // Phát sự kiện
       alert(`${product.name} (x${this.quantity}) đã được thêm vào giỏ hàng!`);
-      console.log('Giỏ hàng:', this.cart);
+      console.log('Giỏ hàng:', cart);
       this.quantity = 1;
     },
     increaseQuantity() {
