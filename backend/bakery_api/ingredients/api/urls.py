@@ -9,8 +9,8 @@ router.register(r'ingredients', IngredientViewSet, basename='ingredient')
 
 urlpatterns = [
     path('', include(router.urls)),  
-    path('api/categories/', unit_list_create),
-    path('api/categories/<int:unit_id>/', delete_unit, name='delete-unit'),
-    path('api/categories/', ingredient_list_create),
-    path('api/categories/<int:unit_id>/', delete_ingredient, name='delete-ingredient')
+    path('api/units/', unit_list_create),
+    path('api/units/<int:unit_id>/', delete_unit, name='delete-unit'),
+    path('api/ingredients/', ingredient_list_create),
+    path('api/ingredients/<int:unit_id>/', delete_ingredient, name='delete-ingredient')
 ]

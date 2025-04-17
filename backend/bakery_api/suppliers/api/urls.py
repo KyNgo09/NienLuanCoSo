@@ -10,6 +10,6 @@ router.register(r'supply_order_details', SupplyOrderDetailViewSet, basename='sup
 
 urlpatterns = [
     path('', include(router.urls)),  
-    path('api/categories/', supplier_list_create),
-    path('api/categories/<int:unit_id>/', delete_supplier, name='delete-supplier')
+    path('api/suppliers/', supplier_list_create),
+    path('api/suppliers/<int:supplier_id>/', delete_supplier, name='delete-supplier')
 ]
