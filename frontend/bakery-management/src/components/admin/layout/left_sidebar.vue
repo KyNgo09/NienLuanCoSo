@@ -26,8 +26,8 @@
     { label: "Nguyên liệu", path: "/admin/ingredient"},
     { label: "Đơn vị đo lường", path: "/admin/unit"},
     { label: "Công thức", path: "/admin/recipe"},
-    { label: "Đơn đặt hàng", path: "/admin/order"},
-    { label: "Khuyến mãi", path: "/admin/promotion"},
+    { label: "Đơn hàng", path: "/admin/order"},
+    // { label: "Khuyến mãi", path: "/admin/promotion"},
   ];
   </script>
   

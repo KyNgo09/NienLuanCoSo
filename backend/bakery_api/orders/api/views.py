@@ -1,122 +1,128 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
 from orders.models import Order, OrderDetail
 from .serializers import OrderSerializer, OrderDetailSerializer
 from customers.models import Customer
-from accounts.models import User
-from products.models import Product
-from customers.api.serializers import CustomerSerializer
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.utils import timezone
 from django.db import transaction
-import logging
+from decimal import Decimal
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            # Lấy dữ liệu từ request
+            user_id = request.data.get('user_id')
+            is_logged_in = request.data.get('isLoggedIn', False)
+            total_amount = Decimal(request.data.get('total_amount', 0))
+            discount = Decimal(request.data.get('discount', 0))
+            final_amount = Decimal(request.data.get('final_amount', 0))
+            payment_method = request.data.get('payment_method')
+            customer_name = request.data.get('customer_name')
+            customer_phone = request.data.get('customer_phone')
+            customer_email = request.data.get('customer_email')
+            address = request.data.get('address')
+            items = request.data.get('items', [])
+
+            # Xử lý Customer
+            customer = None
+            if is_logged_in and user_id:
+                # Người dùng đã đăng nhập
+                try:
+                    customer = Customer.objects.get(user_id=user_id)
+                    # Kiểm tra thông tin Customer
+                    if not customer.name and not customer.phone and not customer.email and not customer.address:
+                        # Cập nhật thông tin từ form
+                        customer.name = customer_name
+                        customer.phone = customer_phone
+                        customer.email = customer_email
+                        customer.address = address
+                        customer.loyalty_point += int(final_amount * Decimal('0.01'))
+                        customer.save()
+                    else:
+                        # Cập nhật loyalty_point = 10% final_amount
+                        customer.loyalty_point += int(final_amount * Decimal('0.01'))
+                        customer.save()
+                except Customer.DoesNotExist:
+                    return Response({"message": "Customer not found for this user"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # Khách vãn lai: Tạo Customer mới
+                customer = Customer.objects.create(
+                    name=customer_name,
+                    phone=customer_phone,
+                    email=customer_email,
+                    address=address,
+                    loyalty_point=0,
+                    user=None  # Không liên kết với User
+                )
+
+            # Tạo Order
+            order = Order.objects.create(
+                customer=customer,
+                total_amount=total_amount,
+                discount=discount,
+                final_amount=final_amount,
+                payment_method=payment_method
+            )
+
+            # Tạo OrderDetail
+            for item in items:
+                OrderDetail.objects.create(
+                    order=order,
+                    product_id=item['product_id'],
+                    quantity=item['quantity'],
+                    unit_price=item['unit_price'],
+                    sub_total=item['sub_total']
+                )
+
+            # Trả về phản hồi
+            return Response({
+                "order_id": order.order_id,
+                "customer_id": customer.customer_id,
+                "loyalty_point": customer.loyalty_point,
+                "message": "Order created successfully"
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"message": f"Error creating order: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @transaction.atomic
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        is_processed = request.data.get('is_processed')
+
+        if is_processed is not None:
+            order_details = OrderDetail.objects.filter(order=instance)
+            if is_processed:  # Tick xử lý
+                for detail in order_details:
+                    product = detail.product
+                    if product.stock_quantity < detail.quantity:
+                        raise ValidationError({
+                            'error': f'Sản phẩm {product.name} không đủ hàng (còn {product.stock_quantity}, cần {detail.quantity})'
+                        })
+                    product.stock_quantity -= detail.quantity
+                    product.save()
+            else:  # Bỏ tick xử lý
+                for detail in order_details:
+                    product = detail.product
+                    product.stock_quantity += detail.quantity
+                    product.save()
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 class OrderDetailViewSet(viewsets.ModelViewSet):
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
 
-logger = logging.getLogger(__name__)
-
-@api_view(['POST'])
-def create_order(request):
-    logger.info("Received order creation request")
-    
-    try:
-        data = request.data
-        logger.debug(f"Request data: {data}")
-
-        # Validate required fields
-        if not data.get('customer_phone') or not data.get('customer_name'):
-            logger.error("Missing required customer fields")
-            return Response({'error': 'Tên và số điện thoại là bắt buộc'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-
-        if not data.get('items') or len(data['items']) == 0:
-            logger.error("Empty items in order")
-            return Response({'error': 'Giỏ hàng không thể trống'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-
-        with transaction.atomic():
-            # Xử lý khách hàng
-            if data.get('isLoggedIn') and data.get('user_id'):
-                try:
-                    user = User.objects.get(pk=data['user_id'])
-                    customer, created = Customer.objects.get_or_create(
-                        user=user,
-                        defaults={
-                            'name': data['customer_name'],
-                            'phone': data['customer_phone'],
-                            'email': data.get('customer_email', ''),
-                            'address': data.get('address', ''),
-                            'loyalty_point': 0
-                        }
-                    )
-                    logger.info(f"Existing customer found: {customer.customer_id}")
-                except User.DoesNotExist:
-                    logger.error(f"User not found: {data['user_id']}")
-                    return Response({'error': 'Người dùng không tồn tại'}, 
-                                  status=status.HTTP_400_BAD_REQUEST)
-            else:
-                customer = Customer.objects.create(
-                    name=data['customer_name'],
-                    phone=data['customer_phone'],
-                    email=data.get('customer_email', ''),
-                    address=data.get('address', ''),
-                    loyalty_point=0
-                )
-                logger.info(f"New guest customer created: {customer.customer_id}")
-
-            # Tạo đơn hàng
-            order = Order.objects.create(
-                customer=customer,
-                total_amount=float(data['total_amount']),
-                discount=float(data.get('discount', 0)),
-                final_amount=float(data['final_amount']),
-                payment_method=data['payment_method']
-            )
-            logger.info(f"Order created: {order.order_id}")
-
-            # Tạo chi tiết đơn hàng
-            for item in data['items']:
-                try:
-                    product = Product.objects.get(pk=item['product_id'])
-                    OrderDetail.objects.create(
-                        order=order,
-                        product=product,
-                        quantity=int(item['quantity']),
-                        unit_price=float(item['unit_price']),
-                        sub_total=float(item['sub_total'])
-                    )
-                    logger.info(f"Added product {product.id} to order")
-                except Product.DoesNotExist:
-                    logger.error(f"Product not found: {item['product_id']}")
-                    raise Exception(f"Sản phẩm ID {item['product_id']} không tồn tại")
-
-            # Tính điểm tích lũy
-            points_rate = 0.1 if (data.get('isLoggedIn') and data.get('user_id')) else 0.01
-            points_earned = int(float(data['final_amount']) * points_rate)
-            customer.loyalty_point += points_earned
-            customer.save()
-            logger.info(f"Added {points_earned} points to customer")
-
-            response_data = {
-                'success': True,
-                'order_id': order.order_id,
-                'customer_id': customer.customer_id,
-                'loyalty_point': customer.loyalty_point,
-                'points_earned': points_earned
-            }
-
-            return Response(response_data, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        logger.error(f"Order creation failed: {str(e)}", exc_info=True)
-        return Response({
-            'success': False,
-            'error': str(e),
-            'message': 'Tạo đơn hàng thất bại. Vui lòng thử lại.'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        order_id = self.request.query_params.get('order')
+        if order_id:
+            queryset = queryset.filter(order_id=order_id)
+        return queryset

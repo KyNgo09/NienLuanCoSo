@@ -4,7 +4,7 @@
         <div class="flex flex-1 w-full">
             <LeftSidebar />
             <div class="p-4 flex-1">
-                <h2 class="text-xl font-bold mb-4 text-gray-900 font-opensans">Nhà cung cấp</h2>
+                <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Nhà cung cấp</h2>
 
                 <!-- Form thêm nhà cung cấp -->
                 <form @submit.prevent="createSupplier" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -25,23 +25,23 @@
                 <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden">
                     <thead>
                         <tr class="bg-customOrange text-white text-left">
-                            <th class="px-4 py-2">STT</th>
-                            <th class="px-4 py-2">Tên</th>
-                            <th class="px-4 py-2">SĐT</th>
-                            <th class="px-4 py-2">Email</th>
-                            <th class="px-4 py-2">Địa chỉ</th>
-                            <th class="px-4 py-2">Thao tác</th>
+                            <th class="px-4 py-2 border">STT</th>
+                            <th class="px-4 py-2 border">Tên</th>
+                            <th class="px-4 py-2 border">SĐT</th>
+                            <th class="px-4 py-2 border">Email</th>
+                            <th class="px-4 py-2 border">Địa chỉ</th>
+                            <th class="px-4 py-2 border">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(supplier, index) in suppliers" :key="supplier.supplier_id"
                             class="even:bg-gray-100 hover:bg-gray-200 transition text-gray-900">
-                            <td class="px-4 py-2">{{ index + 1 }}</td>
-                            <td class="px-4 py-2">{{ supplier.name }}</td>
-                            <td class="px-4 py-2">{{ supplier.phone }}</td>
-                            <td class="px-4 py-2">{{ supplier.email }}</td>
-                            <td class="px-4 py-2">{{ supplier.address }}</td>
-                            <td class="px-4 py-2">
+                            <td class="px-4 py-2 border">{{ index + 1 }}</td>
+                            <td class="px-4 py-2 border">{{ supplier.name }}</td>
+                            <td class="px-4 py-2 border">{{ supplier.phone }}</td>
+                            <td class="px-4 py-2 border">{{ supplier.email }}</td>
+                            <td class="px-4 py-2 border">{{ supplier.address }}</td>
+                            <td class="px-4 py-2 border">
                                 <button @click="deleteSupplier(supplier.supplier_id)"
                                     class="text-red-500 hover:text-red-700 font-semibold">
                                     Xóa
@@ -51,7 +51,7 @@
                     </tbody>
                 </table>
                 <div class="mt-10">
-                    <h2 class="text-xl font-bold mb-4 text-gray-900 font-opensans">Nguyên liệu</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Nguyên liệu</h2>
 
                     <form @submit.prevent="createIngredient" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <input v-model="newIngredient.name" placeholder="Tên nguyên liệu"
@@ -84,23 +84,23 @@
                     <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden">
                         <thead>
                             <tr class="bg-customOrange text-white text-left">
-                                <th class="px-4 py-2">STT</th>
-                                <th class="px-4 py-2">Tên</th>
-                                <th class="px-4 py-2">Số lượng</th>
-                                <th class="px-4 py-2">Đơn vị</th>
-                                <th class="px-4 py-2">Nhà cung cấp</th>
-                                <th class="px-4 py-2">Thao tác</th>
+                                <th class="px-4 py-2 border">STT</th>
+                                <th class="px-4 py-2 border">Tên</th>
+                                <th class="px-4 py-2 border">Số lượng</th>
+                                <th class="px-4 py-2 border">Đơn vị</th>
+                                <th class="px-4 py-2 border">Nhà cung cấp</th>
+                                <th class="px-4 py-2 border">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="(ingredient, index) in ingredients" :key="ingredient.ingredient_id"
                                 class="even:bg-gray-100 hover:bg-gray-200 transition text-gray-900">
-                                <td class="px-4 py-2">{{ index + 1 }}</td>
-                                <td class="px-4 py-2">{{ ingredient.name }}</td>
-                                <td class="px-4 py-2">{{ ingredient.stock_quantity }}</td>
-                                <td class="px-4 py-2">{{ getUnitName(ingredient.unit) }}</td>
-                                <td class="px-4 py-2">{{ getSupplierName(ingredient.supplier) }}</td>
-                                <td class="px-4 py-2">
+                                <td class="px-4 py-2 border">{{ index + 1 }}</td>
+                                <td class="px-4 py-2 border">{{ ingredient.name }}</td>
+                                <td class="px-4 py-2 border">{{ ingredient.stock_quantity }}</td>
+                                <td class="px-4 py-2 border">{{ getUnitName(ingredient.unit) }}</td>
+                                <td class="px-4 py-2 border">{{ getSupplierName(ingredient.supplier) }}</td>
+                                <td class="px-4 py-2 border">
                                     <button @click="deleteIngredient(ingredient.ingredient_id)"
                                         class="text-red-500 hover:text-red-700 font-semibold">
                                         Xóa

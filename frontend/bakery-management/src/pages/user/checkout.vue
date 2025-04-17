@@ -121,12 +121,7 @@ export default {
                 { id: 'ninh_kieu', name: 'Quận Ninh Kiều' },
                 { id: 'cai_rang', name: 'Quận Cái Răng' },
                 { id: 'binh_thuy', name: 'Quận Bình Thủy' },
-                { id: 'o_mon', name: 'Quận Ô Môn' },
-                { id: 'thot_not', name: 'Quận Thốt Nốt' },
-                { id: 'co_do', name: 'Huyện Cờ Đỏ' },
                 { id: 'phong_dien', name: 'Huyện Phong Điền' },
-                { id: 'thoi_lai', name: 'Huyện Thới Lai' },
-                { id: 'vinh_thanh', name: 'Huyện Vĩnh Thạnh' },
             ],
             wards: [],
             wardList: {
@@ -145,29 +140,9 @@ export default {
                     { id: 'binh_thuy', name: 'Phường Bình Thủy' },
                     { id: 'tra_an', name: 'Phường Trà An' },
                 ],
-                o_mon: [
-                    { id: 'o_mon', name: 'Phường Ô Môn' },
-                    { id: 'phuoc_thoi', name: 'Phường Phước Thới' },
-                ],
-                thot_not: [
-                    { id: 'thot_not', name: 'Phường Thốt Nốt' },
-                    { id: 'thuan_an', name: 'Phường Thuận An' },
-                ],
-                co_do: [
-                    { id: 'co_do', name: 'Thị trấn Cờ Đỏ' },
-                    { id: 'thoi_hung', name: 'Xã Thới Hưng' },
-                ],
                 phong_dien: [
                     { id: 'phong_dien', name: 'Thị trấn Phong Điền' },
                     { id: 'nhon_ai', name: 'Xã Nhơn Ái' },
-                ],
-                thoi_lai: [
-                    { id: 'thoi_lai', name: 'Thị trấn Thới Lai' },
-                    { id: 'tan_thanh', name: 'Xã Tân Thạnh' },
-                ],
-                vinh_thanh: [
-                    { id: 'vinh_thanh', name: 'Thị trấn Vĩnh Thạnh' },
-                    { id: 'thanh_an', name: 'Xã Thạnh An' },
                 ],
             },
         };
@@ -176,6 +151,64 @@ export default {
         totalPrice() {
             return this.cart.reduce((total, item) => total + item.price * item.quantity, 0);
         },
+    },
+    async mounted() {
+        // Kiểm tra thông tin Customer từ database nếu đã đăng nhập
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8000/api/customers/by_user/${userId}/`);
+                const customer = response.data;
+                // Điền thông tin từ Customer nếu có
+                this.form.name = customer.name || '';
+                this.form.phone = customer.phone || '';
+                this.form.email = customer.email || '';
+
+                // Phân tích address để điền district, ward, addressDetail
+                if (customer.address) {
+                    const addressParts = customer.address.split(',').map(part => part.trim());
+                    if (addressParts.length >= 3) {
+                        // Phần cuối là district
+                        const districtName = addressParts[addressParts.length - 1];
+                        const district = this.districts.find(d => 
+                            d.name.toLowerCase() === districtName.toLowerCase()
+                        );
+                        if (district) {
+                            this.form.district = district.id;
+                            // Cập nhật wards
+                            this.updateWards();
+                            // Phần áp cuối là ward
+                            const wardName = addressParts[addressParts.length - 2];
+                            const ward = this.wards.find(w => 
+                                w.name.toLowerCase() === wardName.toLowerCase()
+                            );
+                            if (ward) {
+                                this.form.ward = ward.id;
+                            }
+                            // Phần còn lại là addressDetail
+                            this.form.addressDetail = addressParts.slice(0, addressParts.length - 2).join(', ');
+                        } else {
+                            this.form.addressDetail = customer.address;
+                        }
+                    } else {
+                        this.form.addressDetail = customer.address;
+                    }
+                }
+            } catch (error) {
+                console.error('Lỗi khi lấy thông tin Customer:', error);
+                // Nếu không lấy được từ DB, điền từ localStorage
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                const customer = JSON.parse(localStorage.getItem('customer')) || {};
+                this.form.name = customer.name || user.username || '';
+                this.form.email = user.email || '';
+            }
+        } else {
+            // Nếu chưa đăng nhập, điền từ localStorage (nếu có)
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            const customer = JSON.parse(localStorage.getItem('customer')) || {};
+            this.form.name = customer.name || user.username || '';
+            this.form.email = user.email || '';
+        }
     },
     methods: {
         formatPrice(price) {
@@ -240,7 +273,7 @@ export default {
                     }));
                 }
 
-                alert(`Đặt hàng thành công! Mã đơn hàng: ${response.data.order_id}`);
+                alert(`Đặt hàng thành công!`);
                 localStorage.removeItem('cart');
                 this.cart = [];
                 this.$router.push('/products');
@@ -262,4 +295,3 @@ export default {
     },
 };
 </script>
-

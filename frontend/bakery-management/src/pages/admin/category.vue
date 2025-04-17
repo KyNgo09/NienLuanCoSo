@@ -4,7 +4,7 @@
     <div class="flex flex-1 w-full">
       <LeftSidebar />
       <div class="p-4">
-        <h2 class="text-xl font-bold mb-2 text-gray-900 font-opensans">Danh mục sản phẩm</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Danh mục sản phẩm</h2>
         <form @submit.prevent="createCategory" class="mb-4">
           <input v-model="newCategory" placeholder="Tên danh mục" class="border p-2 mr-2 text-black" />
           <button type="submit" class="bg-customOrange text-white p-2 font-bold font-opensans rounded">Thêm</button>
@@ -13,16 +13,16 @@
         <table class="w-full border-collapse border border-gray -300 rounded-lg overflow-hidden">
           <thead>
             <tr class="bg-customOrange text-white text-left font-opensans">
-              <th class="px-4 py-2">STT</th>
-              <th class="px-4 py-2">Tên danh mục</th>
-              <th class="px-4 py-2">Thao tác</th>
+              <th class="px-4 py-2 borde text-centerr">STT</th>
+              <th class="px-4 py-2 borde text-centerr">Tên danh mục</th>
+              <th class="px-4 py-2 border text-center">Thao tác</th>
             </tr>
           </thead>
           <tbody class="text-gray-700">
             <tr v-for="(cat, index) in categories" :key="cat.id" class="even:bg-gray-100 hover:bg-gray-200 transition">
-              <td class="px-4 py-2">{{ index + 1 }}</td>
-              <td class="px-4 py-2">{{ cat.name }}</td>
-              <td class="px-4 py-2">
+              <td class="px-4 py-2 border text-center">{{ index + 1 }}</td>
+              <td class="px-4 py-2 border">{{ cat.name }}</td>
+              <td class="px-4 py-2 border text-center">
                 <button @click="deleteCategory(cat.id)" class="text-red-500 hover:text-red-700 font-semibold">
                   Xóa
                 </button>

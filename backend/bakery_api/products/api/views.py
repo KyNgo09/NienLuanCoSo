@@ -34,6 +34,18 @@ class ProductViewSet(viewsets.ModelViewSet):
             except (ValueError, TypeError):
                 print(f"category_id không hợp lệ: {category_id}")
         return queryset
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Tùy chỉnh phương thức update để hỗ trợ cập nhật từng phần và xử lý lỗi.
+        """
+        partial = kwargs.pop('partial', True)  # Cho phép cập nhật từng phần
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+    
     def get_credentials(self):
         token_path = os.path.join(settings.BASE_DIR, 'credentials', 'token.json')
         client_secret_path = os.path.join(settings.BASE_DIR, 'credentials', 'client_secret.json')

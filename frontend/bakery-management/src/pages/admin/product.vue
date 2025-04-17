@@ -4,8 +4,9 @@
     <div class="flex flex-1 w-full">
       <LeftSidebar />
       <div class="p-4 flex-1">
-        <h2 class="text-xl font-bold mb-4 text-gray-900 font-opensans">Quản lý sản phẩm</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Thêm sản phẩm</h2>
 
+        <!-- Form thêm sản phẩm -->
         <form @submit.prevent="createProduct" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <input v-model="newProduct.name" placeholder="Tên sản phẩm" class="border p-2 text-black rounded" />
           <select v-model="newProduct.category" class="w-full border p-2 rounded text-black">
@@ -50,31 +51,82 @@
           </div>
         </form>
 
-        <h2 class="text-xl font-bold mb-4 text-gray-900 font-opensans">Danh Sách Sản Phẩm</h2>
-        <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden">
+        <!-- Modal sửa sản phẩm -->
+        <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+            <h3 class="text-lg font-bold mb-4 text-gray-900">Sửa sản phẩm</h3>
+            <form @submit.prevent="updateProduct">
+              <div class="grid grid-cols-1 gap-4">
+                <label>
+                  Tên sản phẩm
+                  <input v-model="editProduct.name" placeholder="Tên sản phẩm"
+                    class="w-full border p-2 rounded text-black" />
+                </label>
+                <label> Danh mục
+                  <select v-model="editProduct.category" class="w-full border p-2 rounded text-black">
+                    <option value="">-- Chọn danh mục --</option>
+                    <option v-for="category in categories" :key="category.category_id" :value="category.category_id">
+                      {{ category.name }}
+                    </option>
+                  </select>
+                </label>
+                <label>Mô tả
+                  <textarea v-model="editProduct.description" placeholder="Mô tả"
+                    class="w-full border p-2 text-black rounded"></textarea>
+                </label>
+                <label>Giá
+                  <input v-model.number="editProduct.price" type="number" step="0.01" placeholder="Giá"
+                    class="w-full border p-2 text-black rounded" />
+                </label>
+                <label>Số lượng
+                  <input v-model.number="editProduct.stock_quantity" type="number" placeholder="Số lượng"
+                    class="w-full border p-2 text-black rounded" />
+                </label>
+              </div>
+              <div class="mt-4 flex justify-end space-x-2">
+                <button type="button" @click="closeEditModal"
+                  class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                  Hủy
+                </button>
+                <button type="submit" :disabled="isLoading"
+                  class="bg-customOrange text-white px-4 py-2 rounded font-bold">
+                  {{ isLoading ? 'Đang xử lý...' : 'Lưu' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Danh Sách Sản Phẩm</h2>
+        <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden ">
           <thead>
-            <tr class="bg-customOrange text-white text-left">
-              <!-- <th class="px-4 py-2">Hình ảnh</th> -->
-              <th class="px-4 py-2">Tên</th>
-              <th class="px-4 py-2">Danh mục</th>
-              <th class="px-4 py-2">Mô tả</th>
-              <th class="px-4 py-2">Giá</th>
-              <th class="px-4 py-2">Số lượng</th>
-              <th class="px-4 py-2">Thao tác</th>
+            <tr class="bg-customOrange text-white text-left ">
+              <th class="px-4 py-2 border">Tên</th>
+              <th class="px-4 py-2 border">Danh mục</th>
+              <th class="px-4 py-2 border">Mô tả</th>
+              <th class="px-4 py-2 border">Giá</th>
+              <th class="px-4 py-2 border">Số lượng</th>
+              <th class="px-4 py-2 border">Thao tác</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(product, index) in products" :key="product.product_id"
-              class="even:bg-gray-100 hover:bg-gray-200 transition text-gray-900">
-              <td class="px-4 py-2">{{ product.name }}</td>
-              <td class="px-4 py-2">{{ getCategoryName(product.category) }}</td>
-              <td class="px-4 py-2">{{ product.description }}</td>
-              <td class="px-4 py-2">{{ formatPrice(product.price) }} VND</td>
-              <td class="px-4 py-2">{{ product.stock_quantity }}</td>
-              <td class="px-4 py-2">
+            <tr v-for="(product, index) in products" :key="product.product_id" :class="{
+              'bg-gray-100 hover:bg-gray-200 transition text-gray-900': true,
+              'bg-red-500 hover:bg-red-600 text-white ': product.stock_quantity < 5
+            }">
+              <td class="px-4 py-2 border">{{ product.name }}</td>
+              <td class="px-4 py-2 border">{{ getCategoryName(product.category) }}</td>
+              <td class="px-4 py-2 border">{{ product.description }}</td>
+              <td class="px-4 py-2 border">{{ formatPrice(product.price) }} VND</td>
+              <td class="px-4 py-2 border">{{ product.stock_quantity }}</td>
+              <td class="px-4 py-2 border">
                 <button @click="deleteProduct(product.product_id)"
-                  class="text-red-500 hover:text-red-700 font-semibold">
+                  class="text-red-700 hover:text-red-900 font-semibold">
                   Xóa
+                </button>
+                <button @click="openEditModal(product)" class="text-blue-700 hover:text-blue-900 ml-5 font-semibold">
+                  Sửa
                 </button>
               </td>
             </tr>
@@ -107,8 +159,16 @@ export default {
       },
       selectedImages: [],
       categories: [],
-      products: [],
       isLoading: false,
+      showEditModal: false,
+      editProduct: {
+        product_id: null,
+        name: '',
+        description: '',
+        price: null,
+        category: '',
+        stock_quantity: null
+      }
     };
   },
   methods: {
@@ -130,15 +190,16 @@ export default {
         console.log("Danh sách danh mục:", this.categories);
       } catch (error) {
         console.error("Lỗi khi lấy danh mục:", error);
+        alert('Lỗi khi lấy danh mục: ' + error.message);
       }
     },
-
     async fetchProducts() {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/products/');
         this.products = response.data;
       } catch (error) {
         console.error('Lỗi khi lấy sản phẩm:', error);
+        alert('Lỗi khi lấy sản phẩm: ' + error.message);
       }
     },
     async createProduct() {
@@ -173,7 +234,6 @@ export default {
         const productId = response.data.product_id;
         console.log('Sản phẩm đã tạo:', response.data);
 
-        // Upload ảnh nếu có
         if (this.selectedImages.length > 0) {
           for (const image of this.selectedImages) {
             const formData = new FormData();
@@ -196,7 +256,6 @@ export default {
         this.selectedImages = [];
         await this.fetchProducts();
         alert('Thêm sản phẩm thành công!');
-        this.isLoading = false;
       } catch (error) {
         const errorMsg =
           error.response?.data?.error ||
@@ -204,6 +263,8 @@ export default {
           error.message;
         console.error('Lỗi chi tiết:', error.response?.data || error);
         alert(`Lỗi khi thêm sản phẩm: ${errorMsg}`);
+      } finally {
+        this.isLoading = false;
       }
     },
     async deleteProduct(productId) {
@@ -214,13 +275,79 @@ export default {
           alert('Xóa sản phẩm thành công!');
         } catch (error) {
           console.error('Lỗi khi xóa sản phẩm:', error);
+          alert('Lỗi khi xóa sản phẩm: ' + error.message);
         }
+      }
+    },
+    openEditModal(product) {
+      this.editProduct = {
+        product_id: product.product_id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        stock_quantity: product.stock_quantity
+      };
+      this.showEditModal = true;
+    },
+    closeEditModal() {
+      this.showEditModal = false;
+      this.editProduct = {
+        product_id: null,
+        name: '',
+        description: '',
+        price: null,
+        category: '',
+        stock_quantity: null
+      };
+    },
+    async updateProduct() {
+      if (
+        !this.editProduct.name ||
+        this.editProduct.price === null ||
+        !this.editProduct.category ||
+        this.editProduct.stock_quantity === null ||
+        !this.editProduct.description
+      ) {
+        alert('Vui lòng điền đầy đủ thông tin (tên, giá, danh mục, số lượng, mô tả)!');
+        return;
+      }
+
+      try {
+        this.isLoading = true;
+
+        const data = {
+          name: this.editProduct.name,
+          description: this.editProduct.description,
+          price: this.editProduct.price,
+          category: this.editProduct.category,
+          stock_quantity: this.editProduct.stock_quantity
+        };
+
+        console.log('Dữ liệu cập nhật:', data);
+        await axios.put(`http://127.0.0.1:8000/api/products/${this.editProduct.product_id}/`, data, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        });
+
+        this.closeEditModal();
+        await this.fetchProducts();
+        alert('Cập nhật sản phẩm thành công!');
+      } catch (error) {
+        const errorMsg =
+          error.response?.data?.error ||
+          error.response?.data?.detail ||
+          error.message;
+        console.error('Lỗi chi tiết:', error.response?.data || error);
+        alert(`Lỗi khi cập nhật sản phẩm: ${errorMsg}`);
+      } finally {
+        this.isLoading = false;
       }
     },
     getCategoryName(categoryId) {
       const category = this.categories.find(cat => cat.category_id === categoryId);
       return category ? category.name : "Không xác định";
-    },
+    }
   },
   mounted() {
     this.fetchProducts();

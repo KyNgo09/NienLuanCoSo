@@ -28,7 +28,7 @@ const router = createRouter({
   routes: [
     // Admin routes
     {
-      path: '/admin',
+      path: '/admin/',
       component: Admin,
       children: [
         { path: '', name: 'admin', component: Dashboard },

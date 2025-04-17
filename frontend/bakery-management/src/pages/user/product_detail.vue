@@ -29,10 +29,16 @@
             <button @click="increaseQuantity"
               class="bg-customOrange text-white px-3 py-1 rounded-r hover:bg-orange-600">+</button>
           </div>
-          <button @click="addToCart(product)"
-            class="bg-customOrange text-white font-semibold px-4 py-2 rounded hover:bg-orange-600 transition flex items-center">
-            <i class="fa fa-shopping-basket mr-2"></i> Thêm vào giỏ hàng
-          </button>
+          <div>
+            <button v-if="product.stock_quantity > 0" @click="addToCart(product)"
+              class="bg-customOrange text-white font-semibold px-4 py-2 rounded hover:bg-orange-600 transition flex items-center">
+              <i class="fa fa-shopping-basket mr-2"></i> Thêm vào giỏ hàng
+            </button>
+            <button v-else disabled
+              class="bg-gray-400 text-white font-semibold px-4 py-2 rounded flex items-center cursor-not-allowed">
+              <i class="fa fa-ban mr-2"></i> Đã hết hàng
+            </button>
+          </div>
         </div>
       </div>
     </div>

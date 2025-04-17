@@ -4,7 +4,7 @@
       <div class="flex flex-1 w-full">
         <LeftSidebar />
         <div class="p-4">
-          <h2 class="text-xl font-bold mb-2 text-gray-900 font-opensans">Đơn vị đo lường</h2>
+          <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Đơn vị đo lường</h2>
           <form @submit.prevent="createUnit" class="mb-4">
             <input v-model="newUnit" placeholder="Tên đơn vị" class="border p-2 mr-2 text-black" />
             <button type="submit" class="bg-customOrange text-white p-2 font-bold font-opensans rounded">Thêm</button>
@@ -13,16 +13,16 @@
           <table class="w-full border-collapse border border-gray -300 rounded-lg overflow-hidden">
             <thead>
               <tr class="bg-customOrange text-white text-left font-opensans">
-                <th class="px-4 py-2">STT</th>
-                <th class="px-4 py-2">Tên đơn vị</th>
-                <th class="px-4 py-2">Thao tác</th>
+                <th class="px-4 py-2 border">STT</th>
+                <th class="px-4 py-2 border">Tên đơn vị</th>
+                <th class="px-4 py-2 border">Thao tác</th>
               </tr>
             </thead>
             <tbody class="text-gray-700">
               <tr v-for="(unit, index) in units" :key="unit.id" class="even:bg-gray-100 hover:bg-gray-200 transition">
-                <td class="px-4 py-2">{{ index + 1 }}</td>
-                <td class="px-4 py-2">{{ unit.name }}</td>
-                <td class="px-4 py-2">
+                <td class="px-4 py-2 border text-center">{{ index + 1 }}</td>
+                <td class="px-4 py-2 border text-center">{{ unit.name }}</td>
+                <td class="px-4 py-2 border text-center">
                   <button @click="deleteUnit(unit.unit_id)" class="text-red-500 hover:text-red-700 font-semibold">
                     Xóa
                   </button>

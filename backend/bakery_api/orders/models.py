@@ -16,6 +16,7 @@ class Order(models.Model):
         ('Thanh toán khi nhận hàng', 'Thanh toán khi nhận hàng'),
     ]
     payment_method = models.CharField(max_length=50, choices=payment_method_choices, default='Thanh toán khi nhận hàng')
+    is_processed = models.BooleanField(default=False)
     class Meta:
         db_table = 'orders'
 
