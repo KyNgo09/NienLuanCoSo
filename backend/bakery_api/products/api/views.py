@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
-
+from django.http import HttpResponse
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -25,6 +25,7 @@ from django.conf import settings
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
     def get_queryset(self):
         queryset = super().get_queryset()
         category_id = self.request.query_params.get('category')
@@ -36,10 +37,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         return queryset
     
     def update(self, request, *args, **kwargs):
-        """
-        Tùy chỉnh phương thức update để hỗ trợ cập nhật từng phần và xử lý lỗi.
-        """
-        partial = kwargs.pop('partial', True)  # Cho phép cập nhật từng phần
+        partial = kwargs.pop('partial', True)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -158,6 +156,80 @@ class ProductViewSet(viewsets.ModelViewSet):
                     print(f"Không thể xóa file tạm {temp_file_path}: {str(e)}")
                 
         except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'], url_path='images')
+    def get_images(self, request, pk=None):
+        try:
+            product = self.get_object()
+            images = ProductImage.objects.filter(product=product)
+            
+            if not images.exists():
+                return Response({'images': []}, status=status.HTTP_200_OK)
+
+            creds = self.get_credentials()
+            drive_service = build('drive', 'v3', credentials=creds)
+            validated_images = []
+
+            for image in images:
+                file_id = image.imageurl.split('id=')[-1] if 'id=' in image.imageurl else None
+                if not file_id:
+                    print(f"URL hình ảnh không hợp lệ: {image.imageurl}")
+                    continue
+                
+                try:
+                    file = drive_service.files().get(
+                        fileId=file_id,
+                        fields='id, mimeType',
+                        supportsAllDrives=True
+                    ).execute()
+                    
+                    if file.get('mimeType', '').startswith('image/'):
+                        proxy_url = f"{request.build_absolute_uri('/api/products/proxy-image/')}?file_id={file_id}"
+                        validated_images.append({'imageurl': proxy_url})
+                    else:
+                        print(f"File không phải hình ảnh: {file_id}")
+                
+                except Exception as e:
+                    print(f"Lỗi khi kiểm tra file {file_id}: {str(e)}")
+                    continue
+
+            serializer = ProductImageSerializer(validated_images, many=True)
+            return Response({'images': serializer.data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            print(f"Lỗi khi lấy hình ảnh sản phẩm {pk}: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'], url_path='proxy-image')
+    def proxy_image(self, request):
+        file_id = request.query_params.get('file_id')
+        if not file_id:
+            return Response({'error': 'file_id không được cung cấp'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            creds = self.get_credentials()
+            drive_service = build('drive', 'v3', credentials=creds)
+            
+            file = drive_service.files().get(
+                fileId=file_id,
+                fields='mimeType',
+                supportsAllDrives=True
+            ).execute()
+            
+            if not file.get('mimeType', '').startswith('image/'):
+                return Response({'error': 'File không phải hình ảnh'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            request = drive_service.files().get_media(fileId=file_id, supportsAllDrives=True)
+            image_data = request.execute()
+            
+            response = HttpResponse(content=image_data, content_type=file.get('mimeType'))
+            response['Cache-Control'] = 'public, max-age=3600'
+            response['Access-Control-Allow-Origin'] = '*'
+            return response
+        
+        except Exception as e:
+            print(f"Lỗi khi proxy hình ảnh {file_id}: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 class CategoryViewSet(viewsets.ModelViewSet):

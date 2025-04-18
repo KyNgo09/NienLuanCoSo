@@ -20,8 +20,9 @@ import Home from '@/pages/user/home.vue'
 import Account from '@/pages/user/account.vue'
 import ProductDetail from '@/pages/user/product_detail.vue'
 import Cart from '@/pages/user/cart.vue'
-import checkout from '@/pages/user/checkout.vue'
+import About from '@/pages/user/about.vue'
 import Checkout from '@/pages/user/checkout.vue'
+import Contact from '@/pages/user/contact.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,6 +54,9 @@ const router = createRouter({
         {path: '/product/:id', name: 'ProductDetail', component: ProductDetail},
         {path: 'cart', name: 'cat', component: Cart},
         {path: 'checkout', name: 'checkout', component: Checkout},
+        {path: 'about', name: 'about', component: About},
+        {path: 'contact', name: 'contact', component: Contact},
+
       ],
     },
   ],

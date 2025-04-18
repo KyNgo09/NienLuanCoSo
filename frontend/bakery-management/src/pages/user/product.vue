@@ -4,28 +4,35 @@
     <div class="container mx-auto p-4">
       <h1 class="text-4xl font-bold mb-4 text-customBrown font-sansita">Tất cả sản phẩm</h1>
       <div class="flex flex-col md:flex-row gap-6">
-        <div class="w-48">
-          <h3 class="text-lg font-semibold text-gray-700 mb-2 ">Lọc theo danh mục</h3>
-          <div class="space-y-2">
-            <label class="flex items-center">
+        <div class="w-60 bg-white">
+          <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Lọc theo danh mục</h3>
+          <div class="space-y-3">
+            
+            <label class="flex items-center cursor-pointer">
               <input type="radio" v-model="selectedCategory" :value="null" @change="filterByCategory"
-                class="text-customOrange focus:ring-customOrange" />
-              <span class="ml-2 text-gray-700">Tất cả</span>
+                class="text-orange-500 " />
+              <span class="ml-3 text-gray-800 hover:text-orange-500 transition">Tất cả</span>
             </label>
-            <label v-for="category in categories" :key="category.category_id" class="flex items-center">
+            
+            <label v-for="category in categories" :key="category.category_id" class="flex items-center cursor-pointer">
               <input type="radio" v-model="selectedCategory" :value="category.category_id" @change="filterByCategory"
-                class="text-customOrange focus:ring-customOrange" />
-              <span class="ml-2 text-gray-700">{{ category.name }}</span>
+                class="text-orange-500 " />
+              <span class="ml-3 text-gray-800 hover:text-orange-500 transition">{{ category.name }}</span>
             </label>
           </div>
         </div>
+
         <div class="flex-1">
-          <div v-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div v-if="isLoading" class="text-center py-4 text-gray-500">
+            Đang tải sản phẩm...
+          </div>
+          <div v-else-if="products.length > 0"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             <router-link v-for="product in products" :key="product.product_id"
               :to="{ name: 'ProductDetail', params: { id: product.product_id } }"
               class="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
               <img v-if="product.images && product.images.length > 0" :src="product.images[0].imageurl"
-                alt="Hình ảnh sản phẩm" class="w-full h-48 object-cover"
+                :alt="`Hình ảnh ${product.name}`" class="w-full h-48 object-cover" loading="lazy"
                 @error="handleImageError($event, product.product_id)" />
               <div v-else class="w-full h-48 bg-gray-200 flex items-center justify-center">
                 <span class="text-gray-500">Không có ảnh</span>
@@ -46,7 +53,6 @@
   </div>
 </template>
 
-
 <script>
 import Header from "@/components/user/layout/header.vue";
 import Footer from "@/components/user/layout/footer.vue";
@@ -61,49 +67,46 @@ export default {
     return {
       products: [],
       categories: [],
-      selectedCategory: null
+      selectedCategory: null,
+      isLoading: false
     };
   },
   methods: {
     async fetchProducts(categoryId = null) {
+      this.isLoading = true;
       try {
-        console.log('Đang lấy danh sách sản phẩm với categoryId:', categoryId);
         const url = categoryId !== null && categoryId !== undefined
-          ? `http://127.0.0.1:8000/api/products/?category=${categoryId}`
-          : 'http://127.0.0.1:8000/api/products/';
-        console.log('Gửi request tới:', url);
-        const response = await axios.get(url, {
-          timeout: 10000
-        });
-        console.log('Dữ liệu sản phẩm nhận được:', response.data);
+          ? `${import.meta.env.VITE_API_URL}/api/products/?category=${categoryId}`
+          : `${import.meta.env.VITE_API_URL}/api/products/`;
+        const response = await axios.get(url, { timeout: 10000 });
         this.products = Array.isArray(response.data) ? response.data : [];
-        if (this.products.length === 0) {
-          console.warn('Không có sản phẩm nào từ API.');
-        }
       } catch (error) {
-        console.error('Lỗi khi lấy sản phẩm:', error.response || error.message);
+        console.error('Lỗi khi lấy sản phẩm:', error);
         this.products = [];
+      } finally {
+        this.isLoading = false;
       }
     },
     async fetchCategories() {
+      this.isLoading = true;
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/categories/');
-        console.log('Dữ liệu danh mục nhận được:', response.data);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/categories/`, { timeout: 5000 });
         this.categories = response.data;
       } catch (error) {
         console.error('Lỗi khi lấy danh mục:', error);
+      } finally {
+        this.isLoading = false;
       }
     },
     handleImageError(event, productId) {
-      console.error(`Lỗi tải ảnh cho sản phẩm ID ${productId}:`, event.target.src, event);
-      event.target.src = 'https://placehold.co/150x150?text=No+Image';
+      console.error(`Lỗi tải ảnh cho sản phẩm ID ${productId}:`, event.target.src);
+      event.target.src = '/images/no-image.png';
     },
     formatPrice(price) {
       if (!price && price !== 0) return '0';
-      return parseInt(price).toLocaleString('vi-VN');
+      return Number(price).toLocaleString('vi-VN', { minimumFractionDigits: 0 });
     },
     filterByCategory() {
-      console.log('Lọc với selectedCategory:', this.selectedCategory);
       this.fetchProducts(this.selectedCategory);
     }
   },
@@ -111,5 +114,5 @@ export default {
     this.fetchProducts();
     this.fetchCategories();
   }
-}
+};
 </script>
