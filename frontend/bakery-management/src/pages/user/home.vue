@@ -170,7 +170,7 @@ export default {
         {
           name: 'Bánh Da Lợn',
           price: '25.000 ₫',
-          description: 'Bánh truyền thống với lớp lá dứa thơm ngon đặc trưng',
+          description: 'Bánh truyền thống miền Tây Sông Nước với lớp lá dứa thơm ngon đặc trưng',
           image: banhTtImage
         }
       ],

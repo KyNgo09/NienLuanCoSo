@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-col min-h-screen w-full bg-gray-50">
+  <div class="flex flex-col min-h-screen w-full">
     <Header />
     <div class="flex flex-1 w-full">
       <LeftSidebar />
       <div class="p-6">
         <!-- Danh sách đơn hàng -->
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">Danh sách đơn hàng</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Danh sách đơn hàng</h2>
 
         <!-- Bộ lọc -->
         <div class="mb-6 flex items-center gap-4">
@@ -35,7 +35,7 @@
             </thead>
             <tbody class="text-gray-700">
               <tr v-for="order in paginatedOrders[currentPage]" :key="order.order_id"
-                class="odd:bg-white even:bg-gray-100 hover:bg-orange-100 transition cursor-pointer"
+                class="odd:bg-white even:bg-gray-100 hover:bg-gray-200 transition cursor-pointer"
                 @click="selectOrder(order)">
                 <td class="py-3 px-6 border text-center">{{ order.order_id }}</td>
                 <td class="py-3 px-6 border text-center">{{ order.customer?.name || 'Khách vãng lai' }}</td>
@@ -193,7 +193,7 @@ export default {
   async mounted() {
     try {
       this.jsPDF = jsPDF;
-      this.canExportPDF = true; // Không cần gọi autoTable(this.jsPDF)
+      this.canExportPDF = true;
     } catch (error) {
       console.error('Lỗi khi khởi tạo jsPDF:', error);
       alert('Không thể tải thư viện xuất PDF. Vui lòng kiểm tra cài đặt.');

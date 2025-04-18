@@ -4,7 +4,7 @@
     <div class="flex flex-1 w-full">
       <LeftSidebar />
       <div class="p-4">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Danh mục sản phẩm</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Danh mục sản phẩm</h2>
         <form @submit.prevent="createCategory" class="mb-4">
           <input v-model="newCategory" placeholder="Tên danh mục" class="border p-2 mr-2 text-black" />
           <button type="submit" class="bg-customOrange text-white p-2 font-bold font-opensans rounded">Thêm</button>

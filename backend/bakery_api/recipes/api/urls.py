@@ -4,7 +4,7 @@ from .views import RecipeViewSet, RecipeDetailViewSet
 
 router = DefaultRouter()
 router.register(r'recipes', RecipeViewSet)          # URL cho Recipe
-router.register(r'recipe-details', RecipeDetailViewSet)  # URL cho RecipeDetail
+router.register(r'recipe_details', RecipeDetailViewSet)  # URL cho RecipeDetail
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -5,7 +5,7 @@
       <h1 class="text-4xl font-bold mb-4 text-customBrown font-sansita">Tất cả sản phẩm</h1>
       <div class="flex flex-col md:flex-row gap-6">
         <div class="w-60 bg-white">
-          <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4">Lọc theo danh mục</h3>
+          <h3 class="text-xl font-bold text-gray-800 mb-4">Lọc theo danh mục</h3>
           <div class="space-y-3">
             
             <label class="flex items-center cursor-pointer">

@@ -1,13 +1,13 @@
 <template>
-  <div class="flex flex-col min-h-screen w-full">
+  <div class="flex flex-col min-h-screen w-full ">
     <Header />
     <div class="flex flex-1 w-full">
       <LeftSidebar />
       <div class="p-4 flex-1">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Thêm sản phẩm</h2>
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Thêm sản phẩm</h2>
 
         <!-- Form thêm sản phẩm -->
-        <form @submit.prevent="createProduct" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <form @submit.prevent="createProduct" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 mb-6 border rounded">
           <input v-model="newProduct.name" placeholder="Tên sản phẩm" class="border p-2 text-black rounded" />
           <select v-model="newProduct.category" class="w-full border p-2 rounded text-black">
             <option value="">-- Chọn danh mục --</option>
@@ -98,10 +98,33 @@
         </div>
 
         <!-- Danh sách sản phẩm -->
-        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Danh Sách Sản Phẩm</h2>
-        <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden ">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-800">Danh Sách Sản Phẩm</h2>
+          <div class="flex space-x-4">
+            <!-- Filter by category -->
+            <select v-model="selectedCategory" @change="filterProducts" 
+              class="border p-2 rounded text-black focus:outline-none focus:ring-2 focus:ring-customOrange">
+              <option value="">Tất cả danh mục</option>
+              <option v-for="category in categories" :key="category.category_id" :value="category.category_id">
+                {{ category.name }}
+              </option>
+            </select>
+            
+            <!-- Filter low stock -->
+            <button @click="toggleLowStockFilter" 
+              :class="{
+                'bg-gray-200 hover:bg-gray-300': !showLowStockOnly,
+                'bg-red-500 hover:bg-red-600 text-white': showLowStockOnly
+              }" 
+              class="px-4 py-2 rounded transition">
+              Sản phẩm sắp hết
+            </button>
+          </div>
+        </div>
+
+        <table class="w-full border-collapse border border-gray-300 rounded overflow-hidden">
           <thead>
-            <tr class="bg-customOrange text-white text-left ">
+            <tr class="bg-customOrange text-white text-left">
               <th class="px-4 py-2 border">Tên</th>
               <th class="px-4 py-2 border">Danh mục</th>
               <th class="px-4 py-2 border">Mô tả</th>
@@ -111,15 +134,19 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(product, index) in products" :key="product.product_id" :class="{
+            <tr v-for="(product, index) in filteredProducts" :key="product.product_id" :class="{
               'bg-gray-100 hover:bg-gray-200 transition text-gray-900': true,
-              'bg-red-500 hover:bg-red-600 text-white ': product.stock_quantity < 5
+              'bg-red-500 hover:bg-red-600': product.stock_quantity < 5
             }">
               <td class="px-4 py-2 border">{{ product.name }}</td>
               <td class="px-4 py-2 border">{{ getCategoryName(product.category) }}</td>
-              <td class="px-4 py-2 border">{{ product.description }}</td>
+              <td class="px-4 py-2 border max-w-xs overflow-hidden text-ellipsis whitespace-nowrap" :title="product.description">
+  {{ product.description }}
+</td>
               <td class="px-4 py-2 border">{{ formatPrice(product.price) }} VND</td>
-              <td class="px-4 py-2 border">{{ product.stock_quantity }}</td>
+              <td class="px-4 py-2 border" :class="{ '': product.stock_quantity < 5 }">
+                {{ product.stock_quantity }}
+              </td>
               <td class="px-4 py-2 border">
                 <button @click="deleteProduct(product.product_id)"
                   class="text-red-700 hover:text-red-900 font-semibold">
@@ -150,6 +177,7 @@ export default {
   data() {
     return {
       products: [],
+      filteredProducts: [],
       newProduct: {
         name: '',
         description: '',
@@ -168,7 +196,10 @@ export default {
         price: null,
         category: '',
         stock_quantity: null
-      }
+      },
+      // Filter variables
+      selectedCategory: '',
+      showLowStockOnly: false
     };
   },
   methods: {
@@ -187,7 +218,6 @@ export default {
       try {
         const res = await axios.get('http://127.0.0.1:8000/api/categories/');
         this.categories = res.data;
-        console.log("Danh sách danh mục:", this.categories);
       } catch (error) {
         console.error("Lỗi khi lấy danh mục:", error);
         alert('Lỗi khi lấy danh mục: ' + error.message);
@@ -197,10 +227,27 @@ export default {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/products/');
         this.products = response.data;
+        this.filteredProducts = [...this.products]; // Initialize filtered products
       } catch (error) {
         console.error('Lỗi khi lấy sản phẩm:', error);
         alert('Lỗi khi lấy sản phẩm: ' + error.message);
       }
+    },
+    // Filter methods
+    filterProducts() {
+      this.filteredProducts = this.products.filter(product => {
+        // Filter by category
+        const categoryMatch = !this.selectedCategory || product.category == this.selectedCategory;
+        
+        // Filter by low stock
+        const stockMatch = !this.showLowStockOnly || product.stock_quantity < 5;
+        
+        return categoryMatch && stockMatch;
+      });
+    },
+    toggleLowStockFilter() {
+      this.showLowStockOnly = !this.showLowStockOnly;
+      this.filterProducts();
     },
     async createProduct() {
       if (
@@ -225,14 +272,12 @@ export default {
           stock_quantity: this.newProduct.stock_quantity
         };
 
-        console.log('Dữ liệu gửi đi:', data);
         const response = await axios.post('http://127.0.0.1:8000/api/products/', data, {
           headers: { 'Content-Type': 'application/json' },
           timeout: 10000
         });
 
         const productId = response.data.product_id;
-        console.log('Sản phẩm đã tạo:', response.data);
 
         if (this.selectedImages.length > 0) {
           for (const image of this.selectedImages) {
@@ -324,7 +369,6 @@ export default {
           stock_quantity: this.editProduct.stock_quantity
         };
 
-        console.log('Dữ liệu cập nhật:', data);
         await axios.put(`http://127.0.0.1:8000/api/products/${this.editProduct.product_id}/`, data, {
           headers: { 'Content-Type': 'application/json' },
           timeout: 10000

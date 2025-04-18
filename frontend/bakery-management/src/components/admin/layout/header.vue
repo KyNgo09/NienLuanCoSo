@@ -55,7 +55,7 @@
         <img src="@/assets/admin.png" alt="User" class="w-10 h-10 rounded-full border" />
         <div>
           <p class="text-gray-700 font-medium">Administrator</p>
-          <p class="text-gray-500 text-sm">ID: 1234567</p>
+          <p class="text-gray-500 text-sm">ID: #09102003</p>
         </div>
       </div>
     </div>
