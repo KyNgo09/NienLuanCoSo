@@ -10,7 +10,7 @@ class Order(models.Model):
     order_date = models.DateTimeField(default=timezone.now)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     discount = models.DecimalField(max_digits=10, decimal_places=2)
-    final_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    final_amount = models.DecimalField(max_digits=10, decimal_places=2) 
     payment_method_choices = [
         ('Nhận tại cửa hàng', 'Nhận tại cửa hàng'),
         ('Thanh toán khi nhận hàng', 'Thanh toán khi nhận hàng'),

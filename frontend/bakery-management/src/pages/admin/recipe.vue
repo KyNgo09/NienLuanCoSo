@@ -153,7 +153,7 @@ export default {
           {
             recipedetail_id: null,
             ingredient: "",
-            quantity: 1,
+            quantity: "",
             unit: "",
             availableUnits: []
           }

@@ -2,7 +2,32 @@
   <div class="min-h-screen flex flex-col">
     <Header />
     <div class="container mx-auto p-4">
-      <h1 class="text-4xl font-bold mb-4 text-customBrown font-sansita">Tất cả sản phẩm</h1>
+      <div class="flex justify-between items-center mb-4">
+        <h1 class="text-4xl font-bold text-customBrown font-sansita">Tất cả sản phẩm</h1>
+        <div class="relative  w-64">
+          <input
+            type="text"
+            v-model="searchQuery"
+            @input="handleSearch"
+            placeholder="Tìm kiếm sản phẩm..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-customOrange"
+          />
+          <svg
+            class="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+      </div>
       <div class="flex flex-col md:flex-row gap-6">
         <div class="w-60 bg-white">
           <h3 class="text-xl font-bold text-gray-800 mb-4">Lọc theo danh mục</h3>
@@ -74,6 +99,7 @@
 import Header from "@/components/user/layout/header.vue";
 import Footer from "@/components/user/layout/footer.vue";
 import axios from 'axios';
+import debounce from 'lodash/debounce';
 
 export default {
   components: {
@@ -83,8 +109,10 @@ export default {
   data() {
     return {
       products: [],
+      filteredProducts: [],
       categories: [],
       selectedCategory: null,
+      searchQuery: '',
       isLoading: false,
       currentPage: 1,
       itemsPerPage: 12 // 4 columns * 3 rows
@@ -94,10 +122,10 @@ export default {
     paginatedProducts() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.products.slice(start, end);
+      return this.filteredProducts.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.products.length / this.itemsPerPage);
+      return Math.ceil(this.filteredProducts.length / this.itemsPerPage);
     }
   },
   methods: {
@@ -110,9 +138,11 @@ export default {
           : `${import.meta.env.VITE_API_URL}/api/products/`;
         const response = await axios.get(url, { timeout: 10000 });
         this.products = Array.isArray(response.data) ? response.data : [];
+        this.filteredProducts = [...this.products]; // Initialize filtered products
       } catch (error) {
         console.error('Lỗi khi lấy sản phẩm:', error);
         this.products = [];
+        this.filteredProducts = [];
       } finally {
         this.isLoading = false;
       }
@@ -139,6 +169,17 @@ export default {
     filterByCategory() {
       this.fetchProducts(this.selectedCategory);
     },
+    handleSearch: debounce(function() {
+      if (this.searchQuery.trim() === '') {
+        this.filteredProducts = [...this.products];
+      } else {
+        const query = this.searchQuery.toLowerCase().trim();
+        this.filteredProducts = this.products.filter(product => 
+          product.name.toLowerCase().includes(query)
+        );
+      }
+      this.currentPage = 1; // Reset to first page when searching
+    }, 300),
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;

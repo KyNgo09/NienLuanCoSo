@@ -34,18 +34,18 @@ class OrderViewSet(viewsets.ModelViewSet):
                 try:
                     customer = Customer.objects.get(user_id=user_id)
                     # Kiểm tra thông tin Customer
-                    if not customer.name and not customer.phone and not customer.email and not customer.address:
+                    # if not customer.name and not customer.phone and not customer.email and not customer.address:
                         # Cập nhật thông tin từ form
-                        customer.name = customer_name
-                        customer.phone = customer_phone
-                        customer.email = customer_email
-                        customer.address = address
-                        customer.loyalty_point += int(final_amount * Decimal('0.01'))
-                        customer.save()
-                    else:
-                        # Cập nhật loyalty_point = 10% final_amount
-                        customer.loyalty_point += int(final_amount * Decimal('0.01'))
-                        customer.save()
+                    customer.name = customer_name
+                    customer.phone = customer_phone
+                    customer.email = customer_email
+                    customer.address = address
+                    customer.loyalty_point += int(final_amount * Decimal('0.01'))
+                    customer.save()
+                    # else:
+                    #     # Cập nhật loyalty_point = 10% final_amount
+                    #     customer.loyalty_point += int(final_amount * Decimal('0.01'))
+                    #     customer.save()
                 except Customer.DoesNotExist:
                     return Response({"message": "Customer not found for this user"}, status=status.HTTP_400_BAD_REQUEST)
             else:

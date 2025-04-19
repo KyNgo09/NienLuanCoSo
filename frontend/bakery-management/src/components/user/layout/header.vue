@@ -47,6 +47,10 @@
                 class="mt-4 w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition duration-200 text-sm">
                 Đăng xuất
               </button>
+              <router-link to="/recent_orders"
+                class="mt-2 w-full font-semibold text-gray-800 py-2 rounded-lg hover:text-orange-500 transition duration-200 text-sm flex items-center justify-center">
+                Lịch sử mua hàng
+              </router-link>
             </div>
             <div v-else class="p-4 text-center">
               <p class="text-gray-500 mb-4">Chưa đăng nhập</p>
@@ -92,7 +96,7 @@ export default {
     this.updateCartCount();
     document.addEventListener('click', this.handleClickOutside);
     window.addEventListener('storage', this.handleStorageChange);
-    
+
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleClickOutside);

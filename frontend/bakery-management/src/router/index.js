@@ -23,6 +23,7 @@ import Cart from '@/pages/user/cart.vue'
 import About from '@/pages/user/about.vue'
 import Checkout from '@/pages/user/checkout.vue'
 import Contact from '@/pages/user/contact.vue'
+import RecentOrder from '@/pages/user/recent_order.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,8 @@ const router = createRouter({
         {path: 'checkout', name: 'checkout', component: Checkout},
         {path: 'about', name: 'about', component: About},
         {path: 'contact', name: 'contact', component: Contact},
+        {path: 'recent_orders', name: 'recent_orders', component: RecentOrder},
+
 
       ],
     },
