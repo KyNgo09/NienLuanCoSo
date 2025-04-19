@@ -10,7 +10,8 @@
           <!-- Hiển thị ảnh chính -->
           <div class="relative">
             <img v-if="product.images && product.images.length > 0" :src="product.images[currentImageIndex].imageurl"
-              :alt="`Hình ảnh ${product.name}`" class="w-full h-64 object-cover rounded" loading="lazy"
+              :alt="`Hình ảnh ${product.name}`" class="w-full h-64 object-contain rounded"
+              loading="lazy"
               @error="handleImageError($event)" />
             <div v-else class="w-full h-64 bg-gray-200 flex items-center justify-center rounded">
               <span class="text-gray-500">Không có ảnh</span>

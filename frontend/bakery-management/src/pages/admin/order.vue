@@ -154,8 +154,8 @@
 import LeftSidebar from "@/components/admin/layout/left_sidebar.vue";
 import Header from "@/components/admin/layout/header.vue";
 import axios from 'axios';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; // Import autoTable
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default {
   components: {
@@ -278,47 +278,165 @@ export default {
         this.filterOrders();
       }
     },
-    exportPDF() {
-      if (!this.canExportPDF || !this.jsPDF) {
-        alert('Thư viện PDF không khả dụng. Vui lòng kiểm tra cài đặt.');
-        return;
+    async exportPDF() {
+  if (!this.canExportPDF || !this.jsPDF) {
+    alert('Thư viện PDF không khả dụng. Vui lòng kiểm tra cài đặt.');
+    return;
+  }
+
+  try {
+    // 1. Tạo document
+    const doc = new this.jsPDF({
+      orientation: 'portrait',
+      unit: 'mm'
+    });
+
+    // 2. Sử dụng OpenSans đã được import
+    const fontName = 'opensans';
+    
+    // Kiểm tra và thêm font nếu chưa có
+    if (!this.openSansAdded) {
+      // Lấy font từ DOM (cần đảm bảo font đã load trong index.html)
+      const openSansFont = this.getFontFromDOM('opensans');
+      if (openSansFont) {
+        doc.addFileToVFS('OpenSans.ttf', openSansFont);
+        doc.addFont('OpenSans.ttf', fontName, 'normal');
+        this.openSansAdded = true;
       }
-      const doc = new this.jsPDF();
-      // Đảm bảo font mặc định được thiết lập
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
+    }
 
-      // Thêm thông tin hóa đơn
-      doc.text(`Hóa đơn #${this.selectedOrder.order_id}`, 20, 20);
-      doc.text(`Khách hàng: ${this.selectedOrder.customer?.name || 'Khách vãng lai'}`, 20, 30);
-      doc.text(`Ngày đặt: ${this.formatDate(this.selectedOrder.order_date)}`, 20, 40);
-      doc.text(`Phương thức thanh toán: ${this.selectedOrder.payment_method}`, 20, 50);
-      doc.text(`Địa chỉ: ${this.selectedOrder.customer?.address || 'N/A'}`, 20, 60);
+    // 3. Thiết lập font chính
+    doc.setFont(fontName);
+    doc.setFontSize(12);
 
-      // Tạo bảng với autoTable
-      const tableData = this.orderDetails.map(item => [
-        item.product?.name || 'Sản phẩm không xác định',
-        item.quantity,
-        this.formatPrice(item.unit_price),
-        this.formatPrice(item.sub_total),
-      ]);
-      autoTable(doc, {
-        head: [['Sản phẩm', 'Số lượng', 'Đơn giá', 'Thành tiền']],
-        body: tableData,
-        startY: 70,
-        theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 10 },
-      });
+    // 4. Tiêu đề hóa đơn
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    doc.text('HÓA ĐƠN ĐIỆN TỬ', 105, 20, { align: 'center' });
+    
+    // 5. Thông tin đơn hàng
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Mã đơn hàng: #${this.selectedOrder.order_id}`, 105, 30, { align: 'center' });
 
-      // Thêm thông tin tổng tiền
-      const finalY = doc.lastAutoTable.finalY || 70;
-      doc.text(`Tổng tiền: ${this.formatPrice(this.selectedOrder.total_amount)}`, 20, finalY + 10);
-      doc.text(`Giảm giá: ${this.formatPrice(this.selectedOrder.discount)}`, 20, finalY + 20);
-      doc.text(`Thành tiền: ${this.formatPrice(this.selectedOrder.final_amount)}`, 20, finalY + 30);
+    // 6. Thông tin khách hàng
+    doc.setFontSize(12);
+    const yStart = 40;
+    doc.text(`Khách hàng: ${this.selectedOrder.customer?.name || 'Khách vãng lai'}`, 20, yStart);
+    doc.text(`Loại khách: ${this.selectedOrder.is_registered ? 'Thành viên' : 'Khách vãng lai'}`, 20, yStart + 6);
+    doc.text(`Số điện thoại: ${this.selectedOrder.customer?.phone || 'N/A'}`, 20, yStart + 12);
+    doc.text(`Email: ${this.selectedOrder.customer?.email || 'N/A'}`, 20, yStart + 18);
+    
+    // 7. Thông tin đơn hàng
+    doc.text(`Ngày đặt: ${this.formatDate(this.selectedOrder.order_date)}`, 120, yStart);
+    doc.text(`Phương thức thanh toán: ${this.selectedOrder.payment_method}`, 120, yStart + 6);
+    doc.text(`Địa chỉ: ${this.selectedOrder.customer?.address || 'N/A'}`, 120, yStart + 12);
 
-      // Lưu file PDF
-      doc.save(`hoa_don_${this.selectedOrder.order_id}.pdf`);
-    },
+    // 8. Bảng chi tiết sản phẩm
+    const tableData = this.orderDetails.map((item, index) => [
+      index + 1,
+      item.product?.name || 'Sản phẩm không xác định',
+      item.quantity,
+      this.formatPrice(item.unit_price),
+      this.formatPrice(item.sub_total)
+    ]);
+
+    doc.autoTable({
+      head: [['STT', 'Sản phẩm', 'SL', 'Đơn giá', 'Thành tiền']],
+      body: tableData,
+      startY: yStart + 30,
+      margin: { left: 20, right: 20 },
+      headStyles: {
+        fillColor: [238, 238, 238],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold',
+        font: fontName
+      },
+      styles: {
+        font: fontName,
+        fontSize: 10,
+        cellPadding: 3
+      },
+      columnStyles: {
+        0: { cellWidth: 15 },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 15 },
+        3: { cellWidth: 30 },
+        4: { cellWidth: 30 }
+      }
+    });
+
+    // 9. Tổng kết
+    const finalY = doc.lastAutoTable.finalY + 10;
+    
+    doc.setFontSize(12);
+    doc.text(`Thành tiền: ${this.formatPrice(this.selectedOrder.total_amount)}`, 140, finalY, { align: 'right' });
+    doc.text(`Giảm giá: ${this.formatPrice(this.selectedOrder.discount)}`, 140, finalY + 6, { align: 'right' });
+    
+    doc.setFontSize(14);
+    doc.setFont(fontName, 'bold');
+    doc.text(`Tổng cộng: ${this.formatPrice(this.selectedOrder.final_amount)}`, 140, finalY + 14, { align: 'right' });
+
+    // 10. Footer
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Cảm ơn quý khách đã sử dụng dịch vụ!', 105, 280, { align: 'center' });
+    doc.text(`Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 105, 285, { align: 'center' });
+
+    // Lưu file PDF
+    doc.save(`hoa_don_${this.selectedOrder.order_id}.pdf`);
+  } catch (error) {
+    console.error('Lỗi khi xuất PDF:', error);
+    alert('Đã xảy ra lỗi khi xuất PDF. Vui lòng thử lại.');
+  }
+},
+
+// Hàm lấy font từ DOM
+getFontFromDOM(fontFamily) {
+  try {
+    // Tìm kiếm font-face OpenSans đã được định nghĩa trong CSS
+    const styleSheets = document.styleSheets;
+    for (let i = 0; i < styleSheets.length; i++) {
+      const rules = styleSheets[i].cssRules;
+      for (let j = 0; j < rules.length; j++) {
+        if (rules[j].type === CSSRule.FONT_FACE_RULE && 
+            rules[j].style.fontFamily.includes(fontFamily)) {
+          const src = rules[j].style.src;
+          const urlMatch = src.match(/url\(["']?(.*?)["']?\)/);
+          if (urlMatch && urlMatch[1]) {
+            return this.loadFontAsBase64(urlMatch[1]);
+          }
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Lỗi khi lấy font từ DOM:', error);
+    return null;
+  }
+},
+
+// Hàm tải font và chuyển thành base64
+async loadFontAsBase64(url) {
+  try {
+    const response = await fetch(url);
+    const buffer = await response.arrayBuffer();
+    return this.arrayBufferToBase64(buffer);
+  } catch (error) {
+    console.error('Lỗi khi tải font:', error);
+    return null;
+  }
+},
+
+// Hàm chuyển ArrayBuffer sang Base64
+arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
   },
 };
 </script>
