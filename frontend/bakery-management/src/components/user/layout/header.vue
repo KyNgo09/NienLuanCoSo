@@ -155,7 +155,7 @@ export default {
       this.customer = null;
       this.isLoggedIn = false;
       this.showDropdown = false;
-      window.location.reload();
+      window.location.href = 'http://localhost:5173/';
     },
     toggleDropdown() {
       this.showDropdown = !this.showDropdown;

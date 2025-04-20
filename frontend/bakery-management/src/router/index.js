@@ -32,6 +32,7 @@ const router = createRouter({
     {
       path: '/admin/',
       component: Admin,
+      meta: { requiresAdmin: true }, // Đánh dấu route yêu cầu quyền admin
       children: [
         { path: '', name: 'admin', component: Dashboard },
         { path: 'category', name: 'category', component: Category },
@@ -43,26 +44,37 @@ const router = createRouter({
         { path: 'unit', name: 'unit', component: Unit },
       ],
     },
-
     // User routes
     {
       path: '/',
       component: User,
       children: [
-        { path: '', name: 'home', component: Home},
-        {path: 'products', name: 'products', component: User_Product},
-        {path: 'account', name: 'account', component: Account},
-        {path: '/product/:id', name: 'ProductDetail', component: ProductDetail},
-        {path: 'cart', name: 'cat', component: Cart},
-        {path: 'checkout', name: 'checkout', component: Checkout},
-        {path: 'about', name: 'about', component: About},
-        {path: 'contact', name: 'contact', component: Contact},
-        {path: 'recent_orders', name: 'recent_orders', component: RecentOrder},
-
-
+        { path: '', name: 'home', component: Home },
+        { path: 'products', name: 'products', component: User_Product },
+        { path: 'account', name: 'account', component: Account },
+        { path: '/product/:id', name: 'ProductDetail', component: ProductDetail },
+        { path: 'cart', name: 'cart', component: Cart },
+        { path: 'checkout', name: 'checkout', component: Checkout },
+        { path: 'about', name: 'about', component: About },
+        { path: 'contact', name: 'contact', component: Contact },
+        { path: 'recent_orders', name: 'recent_orders', component: RecentOrder },
       ],
     },
   ],
-})
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAdmin) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.email === 'admin@panaderia.com') {
+      next();
+    } else {
+      alert('Bạn không phải Admin hoặc chưa đăng nhập vào tài khoản của Admin!')
+      next('/'); 
+    }
+  } else {
+    next(); 
+  }
+});
 
 export default router

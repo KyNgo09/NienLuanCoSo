@@ -127,7 +127,13 @@ export default {
         localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('customer', JSON.stringify(response.data.customer || null));
         this.$emit('login-success'); // Thêm event để thông báo Header
-        window.location.href = 'http://localhost:5173/';
+        
+        // Chuyển hướng dựa trên email
+        if (response.data.user.email === 'admin@panaderia.com') {
+          this.$router.push('/admin');
+        } else {
+          this.$router.push('/');
+        }
       } catch (error) {
         console.error('Login error:', error.response);
         this.loginError = error.response?.data?.message || 'Đăng nhập thất bại';

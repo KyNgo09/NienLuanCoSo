@@ -1,9 +1,11 @@
 <template>
-  <div class="bg-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
+  <div class="bg-white  shadow-md flex justify-between items-center sticky top-0 z-50">
     <!-- Logo -->
     <div class="flex items-center space-x-2">
-      <img src="@/assets/logo.png" alt="Logo" class="h-12" />
-      <span class="text-xl font-semibold text-gray-700">Panadería</span>
+      <router-link to="/" class="flex items-center">
+        <img src="@/assets/logo.png" alt="Logo" class="h-18 w-20 mr-2" />
+      </router-link>
+      <span class="text-xl font-semibold text-customBrown font-sansita">Panadería</span>
     </div>
 
     <!-- User Actions -->
@@ -54,7 +56,7 @@
       <div class="flex items-center space-x-2 cursor-pointer">
         <img src="@/assets/admin.png" alt="User" class="w-10 h-10 rounded-full border" />
         <div>
-          <p class="text-gray-700 font-medium">Administrator</p>
+          <p class="text-gray-700 font-medium mr-6">Administrator</p>
           <p class="text-gray-500 text-sm">ID: #09102003</p>
         </div>
       </div>
